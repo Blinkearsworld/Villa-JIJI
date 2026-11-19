@@ -334,7 +334,7 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 <section class="rooms" id="rooms" aria-label="ნომრები">
 <div class="wrap">
 <div class="head">
-<h2>ნომრები 2, 4 და 6 სტუმარზე</h2>
+<h2>ნომრები და ლუქსები</h2>
 <p>ყველა ნომერი თბილია, აივნითა და ტელევიზორით. საუზმე ფასში შედის, ზუსტ ფასს თარიღის მიხედვით გეტყვით.</p>
 </div>
 <div class="rcards" id="roomList"></div>
@@ -384,17 +384,18 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 <script>
 {
 /* Room photos: drop files into img/rooms/ and list them here, e.g. double:['img/rooms/double-1.jpg','img/rooms/double-2.jpg'] */
-const ROOM_PHOTOS={double:[],family:[],large:[]};
-const ROOM_TEXT={double:'წყვილისთვის: ორადგილიანი საწოლი, მშვიდი და თბილი ნომერი.',family:'ოჯახისთვის ან ოთხი მეგობრისთვის, ყველასთვის საკმარისი სივრცით.',large:'დიდი ოჯახის ან ჯგუფისთვის, ერთად დასასვენებლად.'};
+const ROOM_PHOTOS={double:[],family:[],lux:['img/rooms/lux-9.jpg','img/rooms/lux-6.jpg','img/rooms/lux-2.jpg','img/rooms/lux-11.jpg','img/rooms/lux-3.jpg','img/rooms/lux-12.jpg','img/rooms/lux-10.jpg','img/rooms/lux-1.jpg','img/rooms/lux-4.jpg','img/rooms/lux-13.jpg','img/rooms/lux-5.jpg','img/rooms/lux-7.jpg','img/rooms/lux-8.jpg'],large:[]};
+const ROOM_FEATS={double:['საუზმე ფასში','ტელევიზორი'],family:['საუზმე ფასში','ტელევიზორი'],lux:['2 იზოლირებული საძინებელი','მისაღები დივნით','სამზარეულოს კუთხე','აივანი მთის ხედით','საშხაპე, თმის საშრობი','ტელევიზორი','საუზმე ფასში'],large:['საუზმე ფასში','ტელევიზორი']};
+const ROOM_TEXT={lux:'ორი ერთნაირი ლუქსი, თითო ცალკე ბინასავით: ორი იზოლირებული საძინებელი, მისაღები სამზარეულოს კუთხით (ინდუქციური ქურა, მიკროტალღური, მაცივარი, ჩაიდანი) და აივანი.',double:'წყვილისთვის: ორადგილიანი საწოლი, მშვიდი და თბილი ნომერი.',family:'ოჯახისთვის ან ოთხი მეგობრისთვის, ყველასთვის საკმარისი სივრცით.',large:'დიდი ოჯახის ან ჯგუფისთვის, ერთად დასასვენებლად.'};
 const person='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>';
 const bed='<svg width="56" height="40" viewBox="0 0 56 40" fill="none" stroke="#8a97a8" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 34V8M4 24h48v10M4 24v-6h20v6M24 18h28v6"/><circle cx="14" cy="18" r="0"/></svg>';
-const renderRooms=()=>{document.getElementById('roomList').innerHTML=Object.entries(JIJI.types).map(([k,t])=>{
+const renderRooms=()=>{document.getElementById('roomList').innerHTML=Object.entries(JIJI.types).filter(([k])=>JIJI.ROOMS.some(r=>r.type===k)).map(([k,t])=>{
  const ph=ROOM_PHOTOS[k]||[],count=JIJI.ROOMS.filter(r=>r.type===k).length,from=Math.min(...Object.values(t.price));
  const pics=ph.length?`<div class="slides" data-k="${k}">${ph.map((u,i)=>`<img src="${u}" alt="${t.name} ნომერი, ფოტო ${i+1}" loading="lazy">`).join('')}</div>${ph.length>1?`<div class="dots">${ph.map((_,i)=>`<i class="${i?'':'on'}"></i>`).join('')}</div>`:''}`
   :`<div class="soon">${bed}<span>ნომრის ფოტოები მალე დაემატება</span></div>`;
  return `<article class="rc"><div class="ph">${pics}<span class="cap">${person}${t.cap} სტუმარი</span></div>
  <div class="body"><h3>${t.name}</h3><p class="meta">${ROOM_TEXT[k]||''}</p>
- <ul><li>${count} ნომერი</li><li>საუზმე ფასში</li><li>ტელევიზორი</li><li>${t.cap} სტუმრამდე</li></ul>
+ <ul><li>${count} ნომერი</li>${(ROOM_FEATS[k]||[]).map(f=>`<li>${f}</li>`).join('')}</ul>
  <div class="foot"><span class="price">ღამე <b>${from} ₾</b>-დან</span><button class="btn" type="button" data-chat>თავისუფალია?</button></div></div></article>`}).join('');
  document.querySelectorAll('.rc .slides').forEach(sl=>sl.addEventListener('scroll',()=>{const i=Math.round(sl.scrollLeft/sl.clientWidth);sl.parentElement.querySelectorAll('.dots i').forEach((d,j)=>d.classList.toggle('on',i===j))},{passive:true}));
 };

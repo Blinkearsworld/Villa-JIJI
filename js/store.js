@@ -7,14 +7,15 @@ window.JIJI = (() => {
   const DEFAULT_TYPES = {
     double: { name: 'ორადგილიანი', cap: 2, price: { peak: 260, winter: 190, summer: 160, off: 120 } },
     family: { name: 'საოჯახო', cap: 4, price: { peak: 380, winter: 290, summer: 240, off: 180 } },
+    lux:    { name: 'ლუქსი', cap: 4, price: { peak: 600, winter: 460, summer: 380, off: 280 } },
     large:  { name: 'დიდი საოჯახო', cap: 6, price: { peak: 520, winter: 400, summer: 330, off: 250 } }
   };
   // 10 rooms. The split between types is a SAMPLE, the owner sets the real one.
   const ROOMS = [
     { id: '101', type: 'double' }, { id: '102', type: 'double' }, { id: '103', type: 'family' },
     { id: '201', type: 'double' }, { id: '202', type: 'double' }, { id: '203', type: 'family' },
-    { id: '204', type: 'family' }, { id: '301', type: 'family' }, { id: '302', type: 'large' },
-    { id: '303', type: 'large' }
+    { id: '204', type: 'family' }, { id: '301', type: 'family' }, { id: '302', type: 'lux' },
+    { id: '303', type: 'lux' }
   ];
   const SEASONS = { peak: 'ახალი წელი', winter: 'ზამთარი', summer: 'ზაფხული', off: 'დანარჩენი' };
 
@@ -66,7 +67,11 @@ window.JIJI = (() => {
   }
   function load() {
     try { state = JSON.parse(localStorage.getItem(KEY)); } catch (e) { state = null; }
-    if (!state || !state.bookings) { state = seed(); save(); }
+    if (!state || !state.bookings) { state = seed(); save(); return; }
+    // add room types introduced after this browser first saved its data
+    let added = false;
+    for (const k in DEFAULT_TYPES) if (!state.types[k]) { state.types[k] = JSON.parse(JSON.stringify(DEFAULT_TYPES[k])); added = true; }
+    if (added) save();
   }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* storage unavailable: demo keeps working in memory */ } }
   function reset() { state = seed(); save(); }
