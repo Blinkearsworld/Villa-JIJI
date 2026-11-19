@@ -7,6 +7,7 @@ window.JIJI = (() => {
   const DEFAULT_TYPES = {
     double: { name: 'ორადგილიანი', cap: 2, price: { peak: 260, winter: 190, summer: 160, off: 120 } },
     family: { name: 'საოჯახო, 1 საძინებლით', cap: 5, price: { peak: 380, winter: 290, summer: 240, off: 180 } },
+    budget: { name: 'საოჯახო ბიუჯეტური, 1 საძინებლით', cap: 4, price: { peak: 340, winter: 250, summer: 200, off: 150 } },
     duplex: { name: 'დუპლექსი', cap: 4, price: { peak: 620, winter: 480, summer: 390, off: 290 } },
     lux:    { name: 'ლუქსი', cap: 4, price: { peak: 600, winter: 460, summer: 380, off: 280 } },
     large:  { name: 'დიდი საოჯახო', cap: 6, price: { peak: 520, winter: 400, summer: 330, off: 250 } }
@@ -14,7 +15,7 @@ window.JIJI = (() => {
   // 10 rooms. The split between types is a SAMPLE, the owner sets the real one.
   const ROOMS = [
     { id: '101', type: 'double' }, { id: '102', type: 'double' }, { id: '103', type: 'family' },
-    { id: '201', type: 'double' }, { id: '202', type: 'double' }, { id: '203', type: 'family' },
+    { id: '201', type: 'budget' }, { id: '202', type: 'budget' }, { id: '203', type: 'family' },
     { id: '204', type: 'duplex' }, { id: '301', type: 'duplex' }, { id: '302', type: 'lux' },
     { id: '303', type: 'lux' }
   ];
