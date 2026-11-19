@@ -94,6 +94,37 @@ p{margin:0}
 .strip img{height:clamp(300px,52vh,560px);width:auto;border-radius:6px}
 .strip figcaption{position:absolute;left:16px;bottom:14px;font:italic 500 22px Cormorant,serif;text-shadow:0 1px 10px rgba(0,0,0,.6)}
 
+/* spaces, territory, nearby */
+.sec{padding:clamp(80px,10vw,140px) 0}
+.sec h2{font:300 clamp(32px,3.6vw,52px)/1.15 "Noto Serif Georgian",serif;letter-spacing:-.01em}
+.sec .lead{color:#cdd6e2;max-width:560px;margin-top:16px}
+.spaces{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,260px),1fr));gap:14px;margin-top:44px}
+.sp{position:relative;border-radius:10px;overflow:hidden;aspect-ratio:4/3;background:#13213a;display:flex;align-items:flex-end}
+.sp img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.sp::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 40%,rgba(5,10,18,.82))}
+.sp.ic::after{display:none}
+.sp .t{position:relative;z-index:1;padding:16px 18px}
+.sp h3{font:500 19px/1.3 "Noto Sans Georgian",sans-serif}
+.sp p{font-size:14px;color:#cdd6e2;margin-top:4px}
+.sp svg{position:absolute;top:22px;left:18px;color:#f3c27a}
+.where{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:clamp(28px,5vw,72px);align-items:center}
+.where img{border-radius:10px;width:100%;aspect-ratio:16/10;object-fit:cover}
+.ticks{list-style:none;margin:26px 0 0;padding:0;display:grid;gap:10px;color:#dbe3ee}
+.ticks li{display:flex;gap:12px;align-items:flex-start}
+.ticks li::before{content:"";flex:none;width:8px;height:8px;margin-top:9px;border-radius:50%;background:#f3c27a}
+.near{margin-top:44px;border-top:1px solid var(--line)}
+.nr{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px 24px;align-items:baseline;padding:20px 0;border-bottom:1px solid var(--line)}
+.nr h3{font:400 clamp(20px,2.2vw,26px)/1.3 "Noto Serif Georgian",serif}
+.nr p{grid-column:1;color:#a9b6c8;font-size:15px}
+.nr .d{grid-row:1/span 2;grid-column:2;font:italic 500 clamp(28px,3vw,40px)/1 Cormorant,serif;color:#f3c27a;white-space:nowrap;align-self:center}
+.yard{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;margin-top:28px}
+.yard figure{margin:0;position:relative;border-radius:10px;overflow:hidden;grid-column:span 2;aspect-ratio:4/3}
+.yard figure:nth-child(-n+2){grid-column:span 3;aspect-ratio:16/9}
+.yard img{width:100%;height:100%;object-fit:cover}
+.yard figcaption{position:absolute;left:12px;bottom:10px;font-size:14px;font-weight:500;text-shadow:0 1px 8px rgba(0,0,0,.7)}
+@media(max-width:600px){.yard{grid-template-columns:repeat(2,minmax(0,1fr))}.yard figure,.yard figure:nth-child(-n+2){grid-column:span 1;aspect-ratio:4/3}.yard figure:first-child{grid-column:span 2;aspect-ratio:16/9}}
+.small{font-size:13px;color:#8f9db0;margin-top:16px}
+@media(max-width:860px){.where{grid-template-columns:minmax(0,1fr)}}
 /* rooms on snow */
 .rooms{background:var(--snow);color:var(--ink);padding:clamp(90px,12vw,160px) 0}
 .rooms .head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:20px;margin-bottom:48px}
@@ -165,6 +196,8 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 <nav class="nav" aria-label="მენიუ">
 <a href="#seasons">სეზონები</a>
 <a href="#fire">ბუხრის ოთახი</a>
+<a href="#spaces">სივრცეები</a>
+<a href="#near">ახლოს</a>
 <a href="#rooms">ნომრები</a>
 </nav>
 <a class="logo" href="#hero" aria-label="Villa JIJI, მთავარი">
@@ -189,7 +222,7 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 <p class="tag">თოვლი გარეთ, ცეცხლი შიგნით</p>
 </div>
 <div class="side">
-<p>ოჯახური შალე ბაკურიანში, დიდველის საბაგიროსთან ახლოს. ათი ნომერი, ბუხარი და ბაღი აუზით.</p>
+<p>ოჯახური შალე ბაკურიანში, კოხტას საბაგიროდან 300 მეტრში. ათი ნომერი, ბუხარი და ბაღი აუზით.</p>
 <div><a class="btn ghost" href="#book">თარიღის შერჩევა</a></div>
 </div>
 </div>
@@ -247,6 +280,49 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 </div>
 </section>
 
+<section class="sec" id="spaces" aria-label="სივრცეები">
+<div class="wrap">
+<h2>სად დაისვენოთ ვილაში</h2>
+<p class="lead">სახლში თბილი საერთო სივრცეებია, ეზოში კი ადგილი თამაშისთვის, მზისთვის და საღამოს ცეცხლისთვის.</p>
+<div class="spaces"><div class="sp"><img src="img/lounge-wide.jpg" alt="ლაუნჯი და ბარი" loading="lazy"><div class="t"><h3>ლაუნჯი და ბარი</h3><p>ტყავის დივნები, ღვინის თაროები, გიტარა</p></div></div><div class="sp"><img src="img/pool-key.jpg" alt="სეზონური აუზი" loading="lazy"><div class="t"><h3>სეზონური აუზი</h3><p>თბილ თვეებში, მზიან ეზოში</p></div></div><div class="sp"><img src="img/yard/trampoline.jpg" alt="ბატუტი და საბავშვო მოედანი" loading="lazy"><div class="t"><h3>საბავშვო მოედანი</h3><p>სასრიალო, საქანელები და ბატუტი</p></div></div><div class="sp"><img src="img/birch.jpg" alt="აივნები" loading="lazy"><div class="t"><h3>აივნები</h3><p>ხედით მთასა და ეზოზე</p></div></div><div class="sp ic"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><circle cx="8" cy="15" r="4"/><circle cx="16" cy="15" r="4"/><circle cx="12" cy="8" r="4"/></svg><div class="t"><h3>ბილიარდი</h3><p>ლაუნჯში, საღამოობით</p></div></div><div class="sp ic"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="12" rx="1.5"/><path d="M8 21h8M12 17v4"/></svg><div class="t"><h3>კინოღამეები</h3><p>პროექტორი საერთო სივრცეში</p></div></div><div class="sp ic"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M12 3c1 4 5 5 5 10a5 5 0 0 1-10 0c0-3 2-4 2-7 2 1 3 2 3 4"/><path d="M4 21h16"/></svg><div class="t"><h3>მაყალი და ფანჩატური</h3><p>მწვადი და ვახშამი გადახურულ ფანჩატურში</p></div></div><div class="sp ic"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="3"/><path d="M10 17V7h3a3 3 0 0 1 0 6h-3"/></svg><div class="t"><h3>უფასო პარკინგი</h3><p>ეზოს გვერდით</p></div></div></div>
+</div>
+</section>
+
+<section class="sec" id="grounds" aria-label="ეზო" style="padding-top:0">
+<div class="wrap">
+<div class="where">
+<img src="img/garden.jpg" alt="ვილის ეზო: გაზონი, სკამები, საქანელა და აუზი" loading="lazy">
+<div>
+<h2>ეზო</h2>
+<p class="lead">ხის ღობით შემოსაზღვრული საკუთარი ეზო ტყიანი მთის ხედით. ბავშვები უსაფრთხოდ თამაშობენ, დიდები ქოლგის ქვეშ ან შეზლონგზე ისვენებენ.</p>
+<ul class="ticks">
+<li>მწვანე გაზონი, თუჯის სკამები და ხის შეზლონგები</li>
+<li>საბავშვო მოედანი: სასრიალო, საქანელები და ბატუტი</li>
+<li>ქვით მოპირკეთებული ტერასა აუზით და შეზლონგებით</li>
+<li>მაგიდები ქოლგის ქვეშ და გადახურული ფანჩატური</li>
+<li>საღამოს ფარნები და გირლიანდა, ზამთარში თოვლის ეზო</li>
+</ul>
+</div>
+</div>
+<div class="yard">
+<figure><img src="img/yard/pool-terrace.jpg" alt="ქვის ტერასა აუზით და შეზლონგებით" loading="lazy"><figcaption>ტერასა და აუზი</figcaption></figure>
+<figure><img src="img/yard/trampoline.jpg" alt="ბატუტი და საბავშვო მოედანი" loading="lazy"><figcaption>ბატუტი</figcaption></figure>
+<figure><img src="img/yard/playground.jpg" alt="სასრიალო და საქანელები" loading="lazy"><figcaption>საბავშვო მოედანი</figcaption></figure>
+<figure><img src="img/yard/terrace-umbrella.jpg" alt="მაგიდა ქოლგის ქვეშ და ფანჩატური" loading="lazy"><figcaption>ქოლგა და ფანჩატური</figcaption></figure>
+<figure><img src="img/yard/swing.jpg" alt="საქანელა, სკამები და შეზლონგი გაზონზე" loading="lazy"><figcaption>საქანელა</figcaption></figure>
+</div>
+</div>
+</section>
+
+<section class="sec" id="near" aria-label="რა არის ახლოს" style="background:var(--deep)">
+<div class="wrap">
+<h2>რა არის ახლოს</h2>
+<p class="lead">ვილა თრიალეთის ქუჩაზე დგას. მაღაზიები და აფთიაქი ფეხით მისასვლელ მანძილზეა.</p>
+<div class="near"><div class="nr"><h3>საბაგირო კოხტაზე</h3><p>გონდოლა მთის ფერდობზე, ზამთარში სათხილამუროდ</p><span class="d">300 მ</span></div><div class="nr"><h3>ბაკურიანის გასართობი პარკი</h3><p>საბავშვო მოედნები, კაფეები, ზამთარში სასრიალო</p><span class="d">1,8 კმ</span></div><div class="nr"><h3>რკინიგზის სადგური</h3><p>ვიწროლიანდაგიანი "კუკუშკა" ბორჯომისკენ</p><span class="d">2,6 კმ</span></div><div class="nr"><h3>დიდველის საბაგირო</h3><p>ბაკურიანის მთავარი სათხილამურო ზონა, ზაფხულში ტობოგანი</p><span class="d">2,9 კმ</span></div><div class="nr"><h3>ალპური ბოტანიკური ბაღი</h3><p>ფიჭვისა და ნაძვის ტყე, ჩანჩქერი</p><span class="d">2,9 კმ</span></div><div class="nr"><h3>კოხტა-მითარბი</h3><p>გრძელი ტრასები გამოცდილი მოთხილამურეებისთვის</p><span class="d">3,7 კმ</span></div><div class="nr"><h3>ბორჯომი</h3><p>მინერალური წყლების ცენტრალური პარკი</p><span class="d">18 კმ</span></div></div>
+<p class="small">მანძილი ვილიდან პირდაპირ ხაზზეა დათვლილი, გზით ცოტა მეტი იქნება.</p>
+</div>
+</section>
+
 <section class="rooms" id="rooms" aria-label="ნომრები">
 <div class="wrap">
 <div class="head">
@@ -255,7 +331,6 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 </div>
 <div class="rcards" id="roomList"></div>
 <p class="rnote">ფასები და ნომრების რაოდენობა სანიმუშოა, ზუსტს მფლობელი დააზუსტებს.</p>
-<div class="more" id="more"></div>
 </div>
 </section>
 
@@ -317,8 +392,6 @@ const renderRooms=()=>{document.getElementById('roomList').innerHTML=Object.entr
 };
 renderRooms();JIJI.onChange(renderRooms);
 document.getElementById('roomList').addEventListener('click',e=>{if(e.target.closest('[data-chat]'))window.JIJIChat?.open()});
-const more=['საბაგირო და ტრასა ახლოს','სკი-პასი ადგილზე','სეზონური ღია აუზი','ბაღი, საქანელა, მაყალი','საბავშვო მოედანი','ლაუნჯი ბუხრით და ბარი','ბილიარდი და პროექტორი','საუზმე ფასში შედის','უფასო პარკინგი','ცხოველებით შესაძლებელია','მაღაზიები და აფთიაქი ახლოს','ბორჯომი 18 კმ-ში'];
-document.getElementById('more').innerHTML=more.map(m=>`<div>${m}</div>`).join('');
 
 const top=document.getElementById('top');
 const onScroll=()=>top.classList.toggle('solid',scrollY>40);
