@@ -98,14 +98,28 @@ p{margin:0}
 .rooms{background:var(--snow);color:var(--ink);padding:clamp(90px,12vw,160px) 0}
 .rooms .head{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:20px;margin-bottom:48px}
 .rooms .head p{max-width:380px;color:#3e4a5c}
-.room{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:20px;padding:30px 0;border-top:1px solid #c9d1dc;text-decoration:none;color:var(--ink)}
-.room:last-child{border-bottom:1px solid #c9d1dc}
-.room h3{font:400 clamp(26px,3.4vw,46px)/1.15 "Noto Serif Georgian",serif;transition:transform .4s}
-.room:hover h3{transform:translateX(12px)}
-.room small{display:block;margin-top:6px;font-size:15px;color:#4a5668}
-.room .g{display:flex;align-items:center;gap:14px;font-size:15px;white-space:nowrap}
-.room svg{transition:transform .4s}
-.room:hover svg{transform:translateX(6px)}
+.rcards{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,320px),1fr));gap:24px}
+.rc{background:#fff;border-radius:12px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 1px 0 #d6dce5}
+.rc .ph{position:relative;aspect-ratio:4/3;background:#dfe5ec}
+.rc .slides{display:flex;height:100%;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none}
+.rc .slides::-webkit-scrollbar{display:none}
+.rc .slides img{flex:0 0 100%;width:100%;height:100%;object-fit:cover;scroll-snap-align:start}
+.rc .dots{position:absolute;left:0;right:0;bottom:10px;display:flex;justify-content:center;gap:6px}
+.rc .dots i{width:7px;height:7px;border-radius:50%;background:rgba(255,255,255,.55)}
+.rc .dots i.on{background:#fff}
+.rc .cap{position:absolute;top:12px;left:12px;display:flex;align-items:center;gap:6px;background:rgba(11,20,34,.82);color:#fff;border-radius:999px;padding:5px 12px;font-size:14px;font-weight:500}
+.rc .soon{height:100%;display:grid;place-items:center;align-content:center;gap:10px;color:#536175;font-size:14px;text-align:center;padding:16px}
+.rc .body{padding:22px;display:flex;flex-direction:column;gap:12px;flex:1}
+.rc h3{font:400 28px/1.15 "Noto Serif Georgian",serif}
+.rc .meta{color:#4a5668;font-size:15px}
+.rc ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.rc li{font-size:13px;padding:4px 10px;border-radius:999px;background:#eef2f6;color:#2b3546}
+.rc .foot{margin-top:auto;padding-top:14px;border-top:1px solid #e3e8ef;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.rc .price{font-size:15px;color:#4a5668;white-space:nowrap}
+.rc .price b{font:600 24px "Noto Sans Georgian",sans-serif;color:var(--ink)}
+.rc .btn{background:var(--ink);color:#fff;min-height:44px}
+.rc .btn:hover{background:#1d2c45}
+.rnote{margin-top:18px;font-size:13px;color:#536175}
 .more{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,260px),1fr));gap:0 48px;margin-top:72px;font-size:15px;color:#2b3546}
 .more div{padding:12px 0;border-bottom:1px solid #d6dce5}
 
@@ -140,7 +154,6 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 @media(max-width:600px){
 .right .lang{display:none}
 .info,form .row{grid-template-columns:minmax(0,1fr)}
-.room{grid-template-columns:minmax(0,1fr)}
 }
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
 </style>
@@ -237,10 +250,11 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 <section class="rooms" id="rooms" aria-label="ნომრები">
 <div class="wrap">
 <div class="head">
-<h2>ათი ნომერი, სამი ზომა</h2>
+<h2>ნომრები 2, 4 და 6 სტუმარზე</h2>
 <p>ყველა ნომერი თბილია, აივნითა და ტელევიზორით. საუზმე ფასში შედის, ზუსტ ფასს თარიღის მიხედვით გეტყვით.</p>
 </div>
-<div id="roomList"></div>
+<div class="rcards" id="roomList"></div>
+<p class="rnote">ფასები და ნომრების რაოდენობა სანიმუშოა, ზუსტს მფლობელი დააზუსტებს.</p>
 <div class="more" id="more"></div>
 </div>
 </section>
@@ -286,13 +300,23 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 <script src="js/chat.js"></script>
 <script>
 {
-const rooms=[
- {t:'ორადგილიანი',d:'წყვილისთვის, მშვიდი და თბილი',g:'2 სტუმარი'},
- {t:'საოჯახო',d:'ოჯახისთვის ან ოთხი მეგობრისთვის',g:'4 სტუმარი'},
- {t:'დიდი საოჯახო',d:'დიდი ოჯახის ან ჯგუფისთვის',g:'6 სტუმარი'}
-];
-const arrow='<svg width="30" height="12" viewBox="0 0 30 12" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><path d="M0 6h28M23 1l5 5-5 5"/></svg>';
-document.getElementById('roomList').innerHTML=rooms.map(r=>`<a class="room" href="#book"><div><h3>${r.t}</h3><small>${r.d}</small></div><span class="g">${r.g} ${arrow}</span></a>`).join('');
+/* Room photos: drop files into img/rooms/ and list them here, e.g. double:['img/rooms/double-1.jpg','img/rooms/double-2.jpg'] */
+const ROOM_PHOTOS={double:[],family:[],large:[]};
+const ROOM_TEXT={double:'წყვილისთვის: ორადგილიანი საწოლი, მშვიდი და თბილი ნომერი.',family:'ოჯახისთვის ან ოთხი მეგობრისთვის, ყველასთვის საკმარისი სივრცით.',large:'დიდი ოჯახის ან ჯგუფისთვის, ერთად დასასვენებლად.'};
+const person='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>';
+const bed='<svg width="56" height="40" viewBox="0 0 56 40" fill="none" stroke="#8a97a8" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 34V8M4 24h48v10M4 24v-6h20v6M24 18h28v6"/><circle cx="14" cy="18" r="0"/></svg>';
+const renderRooms=()=>{document.getElementById('roomList').innerHTML=Object.entries(JIJI.types).map(([k,t])=>{
+ const ph=ROOM_PHOTOS[k]||[],count=JIJI.ROOMS.filter(r=>r.type===k).length,from=Math.min(...Object.values(t.price));
+ const pics=ph.length?`<div class="slides" data-k="${k}">${ph.map((u,i)=>`<img src="${u}" alt="${t.name} ნომერი, ფოტო ${i+1}" loading="lazy">`).join('')}</div>${ph.length>1?`<div class="dots">${ph.map((_,i)=>`<i class="${i?'':'on'}"></i>`).join('')}</div>`:''}`
+  :`<div class="soon">${bed}<span>ნომრის ფოტოები მალე დაემატება</span></div>`;
+ return `<article class="rc"><div class="ph">${pics}<span class="cap">${person}${t.cap} სტუმარი</span></div>
+ <div class="body"><h3>${t.name}</h3><p class="meta">${ROOM_TEXT[k]||''}</p>
+ <ul><li>${count} ნომერი</li><li>საუზმე ფასში</li><li>ტელევიზორი</li><li>${t.cap} სტუმრამდე</li></ul>
+ <div class="foot"><span class="price">ღამე <b>${from} ₾</b>-დან</span><button class="btn" type="button" data-chat>თავისუფალია?</button></div></div></article>`}).join('');
+ document.querySelectorAll('.rc .slides').forEach(sl=>sl.addEventListener('scroll',()=>{const i=Math.round(sl.scrollLeft/sl.clientWidth);sl.parentElement.querySelectorAll('.dots i').forEach((d,j)=>d.classList.toggle('on',i===j))},{passive:true}));
+};
+renderRooms();JIJI.onChange(renderRooms);
+document.getElementById('roomList').addEventListener('click',e=>{if(e.target.closest('[data-chat]'))window.JIJIChat?.open()});
 const more=['საბაგირო და ტრასა ახლოს','სკი-პასი ადგილზე','სეზონური ღია აუზი','ბაღი, საქანელა, მაყალი','საბავშვო მოედანი','ლაუნჯი ბუხრით და ბარი','ბილიარდი და პროექტორი','საუზმე ფასში შედის','უფასო პარკინგი','ცხოველებით შესაძლებელია','მაღაზიები და აფთიაქი ახლოს','ბორჯომი 18 კმ-ში'];
 document.getElementById('more').innerHTML=more.map(m=>`<div>${m}</div>`).join('');
 
