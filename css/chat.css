@@ -26,3 +26,21 @@
 .jc-typing{align-self:flex-start;color:#a9b6c8;font-size:13px;padding:2px 4px}
 .jc-fab:focus-visible,.jc button:focus-visible,.jc input:focus-visible{outline:2px solid #f3c27a;outline-offset:2px}
 @media(prefers-reduced-motion:reduce){.jc-log{scroll-behavior:auto}}
+/* inline calendar */
+.jc-cal{max-width:100%;width:100%;padding:12px}
+.jc-cal-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.jc-cal-h b{font-weight:500}
+.jc-cal-h button{width:40px;height:40px;border:0;border-radius:10px;background:transparent;color:#eef2f6;font-size:22px;cursor:pointer}
+.jc-cal-h button:disabled{opacity:.25;cursor:default}
+.jc-cal-w,.jc-cal-g{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px;text-align:center}
+.jc-cal-w span{font-size:12px;color:#a9b6c8;padding:4px 0}
+.jc-cal-g button{height:40px;border:0;border-radius:10px;background:transparent;color:#eef2f6;font:14px "Noto Sans Georgian",sans-serif;cursor:pointer}
+.jc-cal-g button:hover:not(:disabled){background:rgba(243,194,122,.15)}
+.jc-cal-g button:disabled{color:#4b5a70;cursor:default}
+.jc-cal-g button.td{box-shadow:inset 0 0 0 1px rgba(243,194,122,.5)}
+.jc-cal-g button.in{background:rgba(243,194,122,.18);border-radius:0}
+.jc-cal-g button.a,.jc-cal-g button.b{background:#f3c27a;color:#0b1422;font-weight:600}
+.jc-cal-s{margin:10px 2px 8px;color:#cdd6e2;font-size:14px}
+.jc-cal-ok{width:100%;min-height:44px;border:0;border-radius:10px;background:#f3c27a;color:#0b1422;font:500 15px "Noto Sans Georgian",sans-serif;cursor:pointer}
+.jc-cal-ok:disabled{opacity:.35;cursor:default}
+.jc-cal.done{opacity:.6}

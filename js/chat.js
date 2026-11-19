@@ -81,24 +81,47 @@
       { t: 'მფლობელთან დაკავშირება', f: contact }
     ]);
   }
-  function nextSat(offsetWeeks = 0) {
-    const t = J.today(), d = new Date(t + 'T00:00:00Z'), add = (6 - d.getUTCDay() + 7) % 7;
-    return J.addDays(t, add + offsetWeeks * 7);
-  }
+  // ---------- inline calendar: tap check-in, then check-out ----------
+  const MONTHS_FULL = ['იანვარი', 'თებერვალი', 'მარტი', 'აპრილი', 'მაისი', 'ივნისი', 'ივლისი', 'აგვისტო', 'სექტემბერი', 'ოქტომბერი', 'ნოემბერი', 'დეკემბერი'];
   function askDate() {
-    bot('შესვლის თარიღი? აირჩიეთ კალენდარში ან ღილაკით.');
-    mode = 'date'; setInput('date');
-    options([
-      { t: 'ეს შაბათი, ' + J.fmt(nextSat()), f: () => gotDate(nextSat()) },
-      { t: 'შემდეგი შაბათი, ' + J.fmt(nextSat(1)), f: () => gotDate(nextSat(1)) },
-      ...nav()
-    ]);
-  }
-  function gotDate(s) {
-    if (!s || s < J.today()) { bot('ეს თარიღი უკვე გავიდა, აირჩიეთ სხვა.'); return askDate(); }
-    ctx.from = s; setInput(null);
-    bot('რამდენი ღამე?');
-    options([1, 2, 3, 4, 5, 7].map(n => ({ t: String(n), f: () => { ctx.n = n; askGuests(); } })).concat(nav()));
+    bot('აირჩიეთ შესვლისა და გასვლის დღეები კალენდარში.');
+    queue = queue.then(() => {
+      const t = J.today(); let y = +t.slice(0, 4), m = +t.slice(5, 7) - 1, a = null, b = null;
+      const wrap = document.createElement('div'); wrap.className = 'jc-m bot jc-cal';
+      log.append(wrap);
+      const pad = n => String(n).padStart(2, '0');
+      function draw() {
+        const first = new Date(Date.UTC(y, m, 1)), lead = (first.getUTCDay() + 6) % 7, dim = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
+        const atStart = y === +t.slice(0, 4) && m === +t.slice(5, 7) - 1;
+        let cells = '';
+        for (let i = 0; i < lead; i++) cells += '<span></span>';
+        for (let d = 1; d <= dim; d++) {
+          const s = `${y}-${pad(m + 1)}-${pad(d)}`, past = s < t;
+          const cls = [s === a ? 'a' : '', s === b ? 'b' : '', a && b && s > a && s < b ? 'in' : '', s === t ? 'td' : ''].join(' ');
+          cells += `<button type="button" data-d="${s}" class="${cls}" ${past ? 'disabled' : ''} aria-label="${d} ${MONTHS_FULL[m]}">${d}</button>`;
+        }
+        const n = a && b ? J.nights(a, b) : 0;
+        const status = !a ? 'შესვლის დღე' : !b ? 'ახლა გასვლის დღე' : `${J.fmtRange(a, b)} · ${n} ღამე`;
+        wrap.innerHTML = `<div class="jc-cal-h"><button type="button" data-nav="-1" aria-label="წინა თვე" ${atStart ? 'disabled' : ''}>‹</button><b>${MONTHS_FULL[m]} ${y}</b><button type="button" data-nav="1" aria-label="შემდეგი თვე">›</button></div>
+          <div class="jc-cal-w"><span>ორ</span><span>სმ</span><span>ოთ</span><span>ხთ</span><span>პრ</span><span>შბ</span><span>კვ</span></div>
+          <div class="jc-cal-g">${cells}</div>
+          <div class="jc-cal-s">${status}</div>
+          <button type="button" class="jc-cal-ok" ${n ? '' : 'disabled'}>გაგრძელება</button>`;
+        scroll();
+      }
+      wrap.addEventListener('click', e => {
+        const nav = e.target.closest('[data-nav]'), day = e.target.closest('[data-d]'), go = e.target.closest('.jc-cal-ok');
+        if (nav) { m += +nav.dataset.nav; if (m < 0) { m = 11; y--; } if (m > 11) { m = 0; y++; } draw(); return; }
+        if (day) { const s = day.dataset.d; if (!a || b || s <= a) { a = s; b = null; } else { b = s; } draw(); return; }
+        if (go && a && b) {
+          wrap.querySelectorAll('button').forEach(x => x.disabled = true); wrap.classList.add('done');
+          me(J.fmtRange(a, b) + ' · ' + J.nights(a, b) + ' ღამე'); opts.innerHTML = '';
+          ctx.from = a; ctx.n = J.nights(a, b); askGuests();
+        }
+      });
+      draw();
+    });
+    options(nav());
   }
   function askGuests() {
     bot('რამდენი სტუმარი?');
@@ -170,7 +193,6 @@
   form.addEventListener('submit', e => {
     e.preventDefault();
     const v = input.value.trim(); if (!v) return;
-    if (mode === 'date') { me(J.fmt(v)); opts.innerHTML = ''; gotDate(v); return; }
     if (mode === 'name') { me(v); ctx.name = v; askPhone(); return; }
     if (mode === 'phone') {
       me(v);
