@@ -372,7 +372,7 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 <p>ყველა ნომერი თბილია, აივნითა და ტელევიზორით. საუზმე ფასში შედის, ზუსტ ფასს თარიღის მიხედვით გეტყვით.</p>
 </div>
 <div class="rcards" id="roomList"></div>
-<p class="rnote">ფასები და ნომრების რაოდენობა სანიმუშოა, ზუსტს მფლობელი დააზუსტებს.</p>
+<p class="rnote">ფასები და ნომრების რაოდენობა სანიმუშოა, ზუსტს სასტუმრო დააზუსტებს.</p>
 </div>
 </section>
 
@@ -405,10 +405,10 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 <label for="tel">ტელეფონი<input id="tel" type="tel" autocomplete="tel" inputmode="tel"></label>
 <button class="btn lamp" type="submit">მოთხოვნის გაგზავნა</button>
 <p class="ok" id="ok" role="status"></p>
-<p class="note">გადახდა არ არის საჭირო. ჯავშანს მფლობელი დაგიდასტურებთ ზარით.</p>
+<p class="note">გადახდა არ არის საჭირო. ჯავშანს სასტუმრო დაგიდასტურებთ ზარით.</p>
 </form>
 </div>
-<footer><span>Villa JIJI</span><span>ბაკურიანი, თრიალეთის ქუჩა · <a href="admin.html">მფლობელისთვის</a></span></footer>
+<footer><span>Villa JIJI</span><span>ბაკურიანი, თრიალეთის ქუჩა · <a href="admin.html">ადმინისტრაცია</a></span></footer>
 </div>
 </section>
 </main>
@@ -458,7 +458,7 @@ form.addEventListener('submit',e=>{e.preventDefault();const a=inEl.value,b=outEl
  const o=JIJI.findOffer(a,b,g),n=JIJI.nights(a,b);
  if(!o){const nx=JIJI.nextOffer(a,n,g);return say('ამ თარიღებზე ადგილი აღარ გვაქვს.'+(nx?' უახლოესი თავისუფალი: '+JIJI.fmtRange(nx.from,nx.to)+'.':''))}
  JIJI.createRequest({from:a,to:b,guests:g,name:nm,phone:ph,source:'site',type:o.type});
- form.reset();say('მოთხოვნა მიღებულია: '+JIJI.fmtRange(a,b)+', '+n+' ღამე, '+o.name+' ნომერი, '+o.total+' ₾ (სანიმუშო ფასი). მფლობელი დაგიკავშირდებათ.')});
+ form.reset();say('მოთხოვნა მიღებულია: '+JIJI.fmtRange(a,b)+', '+n+' ღამე, '+o.name+' ნომერი, '+o.total+' ₾ (სანიმუშო ფასი). სასტუმრო დაგიკავშირდებათ.')});
 
 const nyBox=document.getElementById('nyBox');
 document.getElementById('nyPlay').addEventListener('click',()=>{nyBox.innerHTML='<video src="video/new-year.mp4" poster="video/new-year-poster.jpg" controls playsinline preload="auto"></video>';const v=nyBox.querySelector('video');v.play().catch(()=>{})});
