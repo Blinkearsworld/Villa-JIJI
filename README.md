@@ -27,3 +27,7 @@
 ## GitHub Pages
 
 Settings → Pages → Source: **Deploy from a branch** → `main` / `(root)`.
+
+## ვიდეოები
+
+დემოში ახალი წლის ვიდეო (`video/new-year.mp4`, დაახლ. 11 MB) საიტთან ერთადაა და მხოლოდ "ვიდეოს ნახვა"-ზე დაჭერისას იტვირთება. ნამდვილ საიტზე ვიდეოები YouTube-ზე აიტვირთება: `index.html`-ში `<video>`-ის ნაცვლად ჩაისმება `https://www.youtube-nocookie.com/embed/VIDEO_ID?autoplay=1` iframe, ხოლო `video/` საქაღალდე წაიშლება.

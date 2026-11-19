@@ -94,6 +94,21 @@ p{margin:0}
 .strip img{height:clamp(300px,52vh,560px);width:auto;border-radius:6px}
 .strip figcaption{position:absolute;left:16px;bottom:14px;font:italic 500 22px Cormorant,serif;text-shadow:0 1px 10px rgba(0,0,0,.6)}
 
+/* new year video */
+.ny{padding:clamp(80px,10vw,140px) 0;background:linear-gradient(180deg,var(--night),#0f1b30)}
+.ny .wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.7fr);gap:clamp(28px,5vw,72px);align-items:center}
+.ny h2{font:300 clamp(32px,3.6vw,52px)/1.15 "Noto Serif Georgian",serif;letter-spacing:-.01em}
+.ny p.lead{color:#cdd6e2;margin-top:18px;max-width:440px}
+.ny .chips{margin-top:24px}
+.ny .act{margin-top:30px;display:flex;flex-wrap:wrap;gap:12px}
+.vbox{position:relative;border-radius:10px;overflow:hidden;aspect-ratio:16/9;background:#000;box-shadow:0 30px 80px rgba(0,0,0,.45)}
+.vbox video,.vbox img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.vplay{position:absolute;inset:0;display:grid;place-items:center;border:0;background:linear-gradient(180deg,rgba(0,0,0,0) 40%,rgba(5,10,18,.55));cursor:pointer;color:#0b1422}
+.vplay span{display:flex;align-items:center;gap:12px;min-height:60px;padding:0 26px 0 20px;border-radius:999px;background:#f3c27a;font:500 16px "Noto Sans Georgian",sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.4);transition:transform .25s}
+.vplay:hover span{transform:scale(1.05)}
+.vbox .len{position:absolute;right:14px;bottom:12px;font-size:13px;color:#fff;background:rgba(0,0,0,.55);padding:3px 10px;border-radius:999px;pointer-events:none}
+.ny .small{margin-top:14px}
+@media(max-width:860px){.ny .wrap{grid-template-columns:minmax(0,1fr)}.ny .vbox{order:-1}}
 /* spaces, territory, nearby */
 .sec{padding:clamp(80px,10vw,140px) 0}
 .sec h2{font:300 clamp(32px,3.6vw,52px)/1.15 "Noto Serif Georgian",serif;letter-spacing:-.01em}
@@ -197,6 +212,7 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 <nav class="nav" aria-label="მენიუ">
 <a href="#seasons">სეზონები</a>
 <a href="#fire">ბუხრის ოთახი</a>
+<a href="#newyear">ახალი წელი</a>
 <a href="#spaces">სივრცეები</a>
 <a href="#grounds">ეზო</a>
 <a href="#near">ახლოს</a>
@@ -257,6 +273,24 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 </button>
 </div>
 <p class="hint">აირჩიეთ სეზონი</p>
+</section>
+
+<section class="ny" id="newyear" aria-label="ახალი წელი ვილა ჯიჯიში">
+<div class="wrap">
+<div>
+<h2>ახალი წელი ვილა ჯიჯიში</h2>
+<p class="lead">შობა-ახალ წელს ვილა ერთ დიდ ოჯახად იქცევა: ხაჭაპურსა და ხინკალს ერთად ვაცხობთ და ვახვევთ, სუფრას ბუხართან ვშლით, შუაღამით კი თოვლში ფეიერვერკს ვუყურებთ და კოცონთან ვთბებით.</p>
+<div class="chips"><span>სუფრა ბუხართან</span><span>ერთად ცხობა</span><span>ფეიერვერკი</span><span>კოცონი თოვლში</span></div>
+<div class="act"><button class="btn lamp" type="button" data-chat>ახალი წლის თარიღები</button></div>
+<p class="small">კადრები ვილა ჯიჯის 2021 წლის ახალი წლიდან.</p>
+</div>
+<!-- Demo: video hosted with the site and loaded only on tap. Later: replace the <video> with a YouTube embed (see README). -->
+<div class="vbox" id="nyBox">
+<img src="video/new-year-poster.jpg" alt="ახალი წლის სუფრა ბუხართან, სტუმრები ხელს გვიქნევენ" loading="lazy">
+<button class="vplay" type="button" id="nyPlay" aria-label="ვიდეოს ჩართვა"><span><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>ვიდეოს ნახვა</span></button>
+<span class="len">1:08</span>
+</div>
+</div>
 </section>
 
 <section class="fire" id="fire" aria-label="ბუხრის ოთახი">
@@ -426,6 +460,9 @@ form.addEventListener('submit',e=>{e.preventDefault();const a=inEl.value,b=outEl
  JIJI.createRequest({from:a,to:b,guests:g,name:nm,phone:ph,source:'site',type:o.type});
  form.reset();say('მოთხოვნა მიღებულია: '+JIJI.fmtRange(a,b)+', '+n+' ღამე, '+o.name+' ნომერი, '+o.total+' ₾ (სანიმუშო ფასი). მფლობელი დაგიკავშირდებათ.')});
 
+const nyBox=document.getElementById('nyBox');
+document.getElementById('nyPlay').addEventListener('click',()=>{nyBox.innerHTML='<video src="video/new-year.mp4" poster="video/new-year-poster.jpg" controls playsinline preload="auto"></video>';const v=nyBox.querySelector('video');v.play().catch(()=>{})});
+document.getElementById('newyear').addEventListener('click',e=>{if(e.target.closest('[data-chat]'))window.JIJIChat?.open()});
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const cv=document.getElementById('snow'),cx=cv.getContext('2d');
 let W=0,H=0,flakes=[],run=!reduce,raf=0;
