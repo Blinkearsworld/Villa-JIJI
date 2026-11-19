@@ -7,6 +7,7 @@ window.JIJI = (() => {
   const DEFAULT_TYPES = {
     double: { name: 'ორადგილიანი', cap: 2, price: { peak: 260, winter: 190, summer: 160, off: 120 } },
     family: { name: 'საოჯახო', cap: 4, price: { peak: 380, winter: 290, summer: 240, off: 180 } },
+    duplex: { name: 'დუპლექსი', cap: 4, price: { peak: 620, winter: 480, summer: 390, off: 290 } },
     lux:    { name: 'ლუქსი', cap: 4, price: { peak: 600, winter: 460, summer: 380, off: 280 } },
     large:  { name: 'დიდი საოჯახო', cap: 6, price: { peak: 520, winter: 400, summer: 330, off: 250 } }
   };
@@ -14,7 +15,7 @@ window.JIJI = (() => {
   const ROOMS = [
     { id: '101', type: 'double' }, { id: '102', type: 'double' }, { id: '103', type: 'family' },
     { id: '201', type: 'double' }, { id: '202', type: 'double' }, { id: '203', type: 'family' },
-    { id: '204', type: 'family' }, { id: '301', type: 'family' }, { id: '302', type: 'lux' },
+    { id: '204', type: 'family' }, { id: '301', type: 'duplex' }, { id: '302', type: 'lux' },
     { id: '303', type: 'lux' }
   ];
   const SEASONS = { peak: 'ახალი წელი', winter: 'ზამთარი', summer: 'ზაფხული', off: 'დანარჩენი' };

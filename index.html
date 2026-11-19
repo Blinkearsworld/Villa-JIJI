@@ -317,7 +317,7 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 <figure><img src="img/yard/trampoline.jpg" alt="ბატუტი და საბავშვო მოედანი" loading="lazy"><figcaption>ბატუტი</figcaption></figure>
 <figure><img src="img/yard/playground.jpg" alt="სასრიალო და საქანელები" loading="lazy"><figcaption>საბავშვო მოედანი</figcaption></figure>
 <figure><img src="img/yard/terrace-umbrella.jpg" alt="მაგიდა ქოლგის ქვეშ და ფანჩატური" loading="lazy"><figcaption>ქოლგა და ფანჩატური</figcaption></figure>
-<figure><img src="img/yard/swing.jpg" alt="საქანელა, სკამები და შეზლონგი გაზონზე" loading="lazy"><figcaption>საქანელა</figcaption></figure>
+<figure><img src="img/yard/from-above.jpg" alt="ეზო აივნიდან: სკამები, საქანელა და ქვის ტერასა" loading="lazy"><figcaption>ეზო აივნიდან</figcaption></figure>
 </div>
 </div>
 </section>
@@ -384,9 +384,9 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 <script>
 {
 /* Room photos: drop files into img/rooms/ and list them here, e.g. double:['img/rooms/double-1.jpg','img/rooms/double-2.jpg'] */
-const ROOM_PHOTOS={double:[],family:[],lux:['img/rooms/lux-9.jpg','img/rooms/lux-6.jpg','img/rooms/lux-2.jpg','img/rooms/lux-11.jpg','img/rooms/lux-3.jpg','img/rooms/lux-12.jpg','img/rooms/lux-10.jpg','img/rooms/lux-1.jpg','img/rooms/lux-4.jpg','img/rooms/lux-13.jpg','img/rooms/lux-5.jpg','img/rooms/lux-7.jpg','img/rooms/lux-8.jpg'],large:[]};
-const ROOM_FEATS={double:['საუზმე ფასში','ტელევიზორი'],family:['საუზმე ფასში','ტელევიზორი'],lux:['2 იზოლირებული საძინებელი','მისაღები დივნით','სამზარეულოს კუთხე','აივანი მთის ხედით','საშხაპე, თმის საშრობი','ტელევიზორი','საუზმე ფასში'],large:['საუზმე ფასში','ტელევიზორი']};
-const ROOM_TEXT={lux:'ორი ერთნაირი ლუქსი, თითო ცალკე ბინასავით: ორი იზოლირებული საძინებელი, მისაღები სამზარეულოს კუთხით (ინდუქციური ქურა, მიკროტალღური, მაცივარი, ჩაიდანი) და აივანი.',double:'წყვილისთვის: ორადგილიანი საწოლი, მშვიდი და თბილი ნომერი.',family:'ოჯახისთვის ან ოთხი მეგობრისთვის, ყველასთვის საკმარისი სივრცით.',large:'დიდი ოჯახის ან ჯგუფისთვის, ერთად დასასვენებლად.'};
+const ROOM_PHOTOS={double:[],family:[],duplex:['img/rooms/duplex-1.jpg','img/rooms/duplex-2.jpg','img/rooms/duplex-3.jpg','img/rooms/duplex-4.jpg','img/rooms/duplex-5.jpg','img/rooms/duplex-6.jpg','img/rooms/duplex-7.jpg','img/rooms/duplex-8.jpg'],lux:['img/rooms/lux-9.jpg','img/rooms/lux-6.jpg','img/rooms/lux-2.jpg','img/rooms/lux-11.jpg','img/rooms/lux-3.jpg','img/rooms/lux-12.jpg','img/rooms/lux-10.jpg','img/rooms/lux-1.jpg','img/rooms/lux-4.jpg','img/rooms/lux-13.jpg','img/rooms/lux-5.jpg','img/rooms/lux-7.jpg','img/rooms/lux-8.jpg'],large:[]};
+const ROOM_FEATS={duplex:['ორსართულიანი','2 საძინებელი','მანსარდა სახურავის ფანჯრით','მაღალი ჭერი მისაღებში','სამზარეულოს კუთხე','აივანი მთის ხედით','საუზმე ფასში'],double:['საუზმე ფასში','ტელევიზორი'],family:['საუზმე ფასში','ტელევიზორი'],lux:['2 იზოლირებული საძინებელი','მისაღები დივნით','სამზარეულოს კუთხე','აივანი მთის ხედით','საშხაპე, თმის საშრობი','ტელევიზორი','საუზმე ფასში'],large:['საუზმე ფასში','ტელევიზორი']};
+const ROOM_TEXT={duplex:'ორ დონეზე გაშლილი ბინა: ქვემოთ მისაღები მაღალი ხის ჭერით, სამზარეულო და საძინებელი აივნით, ხვეული კიბით კი მანსარდის საძინებელში ახვალთ.',lux:'ორი ერთნაირი ლუქსი, თითო ცალკე ბინასავით: ორი იზოლირებული საძინებელი, მისაღები სამზარეულოს კუთხით (ინდუქციური ქურა, მიკროტალღური, მაცივარი, ჩაიდანი) და აივანი.',double:'წყვილისთვის: ორადგილიანი საწოლი, მშვიდი და თბილი ნომერი.',family:'ოჯახისთვის ან ოთხი მეგობრისთვის, ყველასთვის საკმარისი სივრცით.',large:'დიდი ოჯახის ან ჯგუფისთვის, ერთად დასასვენებლად.'};
 const person='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>';
 const bed='<svg width="56" height="40" viewBox="0 0 56 40" fill="none" stroke="#8a97a8" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 34V8M4 24h48v10M4 24v-6h20v6M24 18h28v6"/><circle cx="14" cy="18" r="0"/></svg>';
 const renderRooms=()=>{document.getElementById('roomList').innerHTML=Object.entries(JIJI.types).filter(([k])=>JIJI.ROOMS.some(r=>r.type===k)).map(([k,t])=>{
