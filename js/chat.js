@@ -90,7 +90,8 @@
       const wrap = document.createElement('div'); wrap.className = 'jc-m bot jc-cal';
       log.append(wrap);
       const pad = n => String(n).padStart(2, '0');
-      function draw() {
+      function draw(initial) {
+        const keep = log.scrollTop;
         const first = new Date(Date.UTC(y, m, 1)), lead = (first.getUTCDay() + 6) % 7, dim = new Date(Date.UTC(y, m + 1, 0)).getUTCDate();
         const atStart = y === +t.slice(0, 4) && m === +t.slice(5, 7) - 1;
         let cells = '';
@@ -107,7 +108,8 @@
           <div class="jc-cal-g">${cells}</div>
           <div class="jc-cal-s">${status}</div>
           <button type="button" class="jc-cal-ok" ${n ? '' : 'disabled'}>გაგრძელება</button>`;
-        scroll();
+        // keep the calendar where the guest is looking; only the first render scrolls it into view
+        log.scrollTop = initial ? Math.max(0, wrap.offsetTop - 8) : keep;
       }
       wrap.addEventListener('click', e => {
         const nav = e.target.closest('[data-nav]'), day = e.target.closest('[data-d]'), go = e.target.closest('.jc-cal-ok');
@@ -119,7 +121,7 @@
           ctx.from = a; ctx.n = J.nights(a, b); askGuests();
         }
       });
-      draw();
+      draw(true);
     });
     options(nav());
   }

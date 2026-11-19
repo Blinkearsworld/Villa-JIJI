@@ -9,7 +9,7 @@
 .jc-head small{color:#a9b6c8;font-size:12px}
 .jc-x{width:44px;height:44px;border:0;border-radius:10px;background:transparent;color:#eef2f6;cursor:pointer;display:grid;place-items:center}
 .jc-x:hover{background:rgba(238,242,246,.08)}
-.jc-log{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth}
+.jc-log{position:relative;flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth}
 .jc-m{max-width:86%;padding:10px 14px;border-radius:14px;white-space:pre-line;overflow-wrap:anywhere}
 .jc-m.bot{align-self:flex-start;background:#1a2a45;border-bottom-left-radius:4px}
 .jc-m.me{align-self:flex-end;background:#f3c27a;color:#0b1422;border-bottom-right-radius:4px}
@@ -30,11 +30,11 @@
 .jc-cal{max-width:100%;width:100%;padding:12px}
 .jc-cal-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
 .jc-cal-h b{font-weight:500}
-.jc-cal-h button{width:40px;height:40px;border:0;border-radius:10px;background:transparent;color:#eef2f6;font-size:22px;cursor:pointer}
+.jc-cal-h button{width:44px;height:44px;touch-action:manipulation;border:0;border-radius:10px;background:transparent;color:#eef2f6;font-size:22px;cursor:pointer}
 .jc-cal-h button:disabled{opacity:.25;cursor:default}
 .jc-cal-w,.jc-cal-g{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:2px;text-align:center}
 .jc-cal-w span{font-size:12px;color:#a9b6c8;padding:4px 0}
-.jc-cal-g button{height:40px;border:0;border-radius:10px;background:transparent;color:#eef2f6;font:14px "Noto Sans Georgian",sans-serif;cursor:pointer}
+.jc-cal-g button{height:38px;touch-action:manipulation;border:0;border-radius:10px;background:transparent;color:#eef2f6;font:14px "Noto Sans Georgian",sans-serif;cursor:pointer}
 .jc-cal-g button:hover:not(:disabled){background:rgba(243,194,122,.15)}
 .jc-cal-g button:disabled{color:#4b5a70;cursor:default}
 .jc-cal-g button.td{box-shadow:inset 0 0 0 1px rgba(243,194,122,.5)}
