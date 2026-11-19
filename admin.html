@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ka">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Villa JIJI ადმინი</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Georgian:wght@400;500;600&family=Cormorant:ital,wght@1,600&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef2f6;--card:#fff;--ink:#0b1422;--mute:#536175;--line:#d5dce6;--night:#0b1422;--lamp:#f3c27a;--ok:#1f7a4d;--okbg:#dff3e8;--wait:#9a5b00;--waitbg:#fff1d9;--no:#b42318}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 "Noto Sans Georgian",system-ui,sans-serif}
+button,input,select{font:inherit}
+a{color:inherit}
+.bar{background:var(--night);color:#eef2f6;position:sticky;top:0;z-index:5}
+.bar .in{max-width:1240px;margin:0 auto;padding:0 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;min-height:60px}
+.bar b{font:italic 600 24px/1 Cormorant,serif}
+.bar small{color:#a9b6c8;margin-left:8px}
+.bar a{font-size:14px;color:#cdd6e2}
+.tabs{max-width:1240px;margin:0 auto;padding:12px 16px 0;display:flex;gap:6px;overflow-x:auto}
+.tab{min-height:44px;padding:0 18px;border-radius:10px 10px 0 0;border:1px solid transparent;border-bottom:0;background:transparent;color:var(--mute);cursor:pointer;white-space:nowrap;display:flex;align-items:center;gap:8px}
+.tab[aria-selected=true]{background:var(--card);color:var(--ink);border-color:var(--line);font-weight:500}
+.badge{min-width:22px;height:22px;padding:0 6px;border-radius:999px;background:var(--lamp);color:var(--ink);font-size:12px;font-weight:600;display:inline-grid;place-items:center}
+main{max-width:1240px;margin:0 auto;padding:0 16px 60px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:0 12px 12px 12px;padding:clamp(16px,2.5vw,28px)}
+.panel[hidden]{display:none}
+h1{font-size:22px;font-weight:600;margin:0 0 4px}
+h2{font-size:17px;font-weight:600;margin:28px 0 12px}
+.sub{color:var(--mute);margin:0 0 20px}
+.btn{min-height:44px;padding:0 18px;border-radius:10px;border:1px solid var(--line);background:#fff;color:var(--ink);cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn.pri{background:var(--night);border-color:var(--night);color:#fff}
+.btn.okb{background:var(--ok);border-color:var(--ok);color:#fff}
+.btn.nob{color:var(--no)}
+.btn:focus-visible,.tab:focus-visible,input:focus-visible,select:focus-visible,.cell:focus-visible{outline:2px solid #2f6fde;outline-offset:2px}
+.reqs{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,330px),1fr));gap:14px}
+.req{border:1px solid var(--line);border-radius:12px;padding:16px;display:grid;gap:10px;background:#fbfcfd}
+.req .top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.req .who{font-weight:600;font-size:17px}
+.req .tel{display:block;color:var(--mute);text-decoration:none}
+.req dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 14px;margin:0}
+.req dt{color:var(--mute)}
+.req dd{margin:0}
+.req .sum{font-size:20px;font-weight:600;white-space:nowrap}
+.req .acts{display:flex;gap:8px;flex-wrap:wrap}
+.pill{font-size:12px;padding:3px 10px;border-radius:999px;white-space:nowrap;font-weight:500}
+.p-wait{background:var(--waitbg);color:var(--wait)}
+.p-ok{background:var(--okbg);color:var(--ok)}
+.p-no{background:#fde7e5;color:var(--no)}
+.src{font-size:12px;color:var(--mute)}
+.msg{padding:10px 14px;border-radius:10px;background:#fde7e5;color:var(--no);margin-top:6px}
+.msg.good{background:var(--okbg);color:var(--ok)}
+.empty{padding:28px;text-align:center;color:var(--mute);border:1px dashed var(--line);border-radius:12px}
+.hist{width:100%;border-collapse:collapse;font-size:14px}
+.hist th,.hist td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);white-space:nowrap}
+.hist th{color:var(--mute);font-weight:500}
+.scroll{overflow-x:auto}
+.calnav{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:14px}
+.calnav strong{margin:0 8px}
+.legend{display:flex;flex-wrap:wrap;gap:14px;color:var(--mute);font-size:13px;margin:0 0 12px}
+.legend i{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-right:6px}
+.cal{border-collapse:separate;border-spacing:0;font-size:13px}
+.cal th,.cal td{border-bottom:1px solid var(--line);border-right:1px solid #e8edf3;padding:0;height:46px}
+.cal thead th{position:sticky;top:0;background:#fff;font-weight:500;color:var(--mute);min-width:46px;text-align:center;line-height:1.2;padding:4px 2px}
+.cal thead th.we{color:var(--ink)}
+.cal thead th.td{background:var(--lamp);color:var(--ink)}
+.cal th.room{position:sticky;left:0;z-index:2;background:#fff;text-align:left;padding:0 12px;min-width:120px;font-weight:500;color:var(--ink)}
+.cal th.room small{display:block;color:var(--mute);font-weight:400}
+.cal thead th.room{z-index:3}
+.cell{width:100%;height:100%;border:0;background:transparent;cursor:pointer;display:block}
+.cell:hover{background:#f1f5fa}
+.bk{height:100%;margin:5px 0;border-radius:8px;background:var(--night);color:#fff;font-size:12px;display:flex;align-items:center;padding:0 8px;white-space:nowrap;overflow:hidden;cursor:pointer;border:0;width:calc(100% - 4px);text-align:left}
+.bk.start{margin-left:4px}
+.pend td{height:34px;background:#fffaf0}
+.pend th.room{background:#fffaf0}
+.pc{display:grid;place-items:center;height:100%;font-weight:600;color:var(--wait)}
+.prices{width:100%;max-width:760px;border-collapse:collapse}
+.prices th,.prices td{padding:10px 8px;border-bottom:1px solid var(--line);text-align:left}
+.prices th{color:var(--mute);font-weight:500;font-size:14px}
+.prices input{width:100%;max-width:110px;min-height:44px;padding:0 10px;border:1px solid var(--line);border-radius:8px;font-size:16px;text-align:right}
+.note{font-size:13px;color:var(--mute);margin-top:18px}
+dialog{border:0;border-radius:14px;padding:0;width:min(440px,calc(100vw - 24px));box-shadow:0 30px 80px rgba(0,0,0,.35)}
+dialog::backdrop{background:rgba(11,20,34,.55)}
+dialog form{padding:22px;display:grid;gap:14px}
+dialog label{display:grid;gap:6px;font-size:14px;color:var(--mute)}
+dialog input,dialog select{min-height:46px;padding:0 12px;border:1px solid var(--line);border-radius:8px;font-size:16px;color:var(--ink);background:#fff}
+dialog .row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+dialog .acts{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+.gate{max-width:360px;margin:12vh auto;background:#fff;border:1px solid var(--line);border-radius:14px;padding:28px;display:grid;gap:14px}
+.gate input{min-height:50px;padding:0 14px;border:1px solid var(--line);border-radius:10px;font-size:20px;letter-spacing:.3em;text-align:center}
+@media(max-width:600px){.bar small{display:none}dialog .row{grid-template-columns:minmax(0,1fr)}.cal th.room{min-width:92px;padding:0 8px}}
+</style>
+</head>
+<body>
+
+<div class="gate" id="gate">
+<h1>Villa JIJI · მფლობელი</h1>
+<p class="sub" style="margin:0">შეიყვანეთ PIN. სადემონსტრაციო PIN: 1234</p>
+<form id="gateForm"><label for="pin" class="sub" style="margin:0 0 8px;display:block">PIN</label><input id="pin" inputmode="numeric" autocomplete="off" maxlength="6"><p class="msg" id="pinMsg" hidden>არასწორი PIN</p><button class="btn pri" style="width:100%;margin-top:12px">შესვლა</button></form>
+</div>
+
+<div id="app" hidden>
+<header class="bar"><div class="in"><div><b>Villa JIJI</b><small>მართვის პანელი</small></div><a href="index.html">საიტზე დაბრუნება</a></div></header>
+<div class="tabs" role="tablist">
+<button class="tab" role="tab" aria-selected="true" data-tab="req" id="t-req">მოთხოვნები <span class="badge" id="cnt">0</span></button>
+<button class="tab" role="tab" aria-selected="false" data-tab="cal" id="t-cal">კალენდარი</button>
+<button class="tab" role="tab" aria-selected="false" data-tab="price" id="t-price">ფასები</button>
+</div>
+<main>
+<section class="panel" id="p-req" role="tabpanel" aria-labelledby="t-req">
+<h1>ახალი მოთხოვნები</h1>
+<p class="sub">დაადასტურეთ ან უარყავით. დადასტურებისას სისტემა თავისუფალ ნომერს თავად ირჩევს.</p>
+<div id="flash"></div>
+<div class="reqs" id="reqs"></div>
+<h2>ისტორია</h2>
+<div class="scroll"><table class="hist"><thead><tr><th>სტუმარი</th><th>თარიღები</th><th>ნომერი</th><th>წყარო</th><th>სტატუსი</th></tr></thead><tbody id="hist"></tbody></table></div>
+</section>
+
+<section class="panel" id="p-cal" role="tabpanel" aria-labelledby="t-cal" hidden>
+<h1>ნომრების კალენდარი</h1>
+<p class="sub">ცარიელ უჯრაზე დაჭერით ჯავშანს ხელით დაამატებთ, მაგალითად სატელეფონო ზარისას.</p>
+<div class="calnav">
+<button class="btn" id="prev" aria-label="წინა კვირა">←</button>
+<button class="btn" id="todayBtn">დღეს</button>
+<button class="btn" id="next" aria-label="შემდეგი კვირა">→</button>
+<strong id="range"></strong>
+<button class="btn pri" id="addBtn">+ ჯავშანი</button>
+</div>
+<div class="legend"><span><i style="background:#0b1422"></i>დადასტურებული</span><span><i style="background:#fff1d9;border:1px solid #e9c98e"></i>მოთხოვნა მოლოდინში, ნომერი არ არის დაკავებული</span></div>
+<div class="scroll"><table class="cal" id="cal"></table></div>
+</section>
+
+<section class="panel" id="p-price" role="tabpanel" aria-labelledby="t-price" hidden>
+<h1>ფასები ღამეში, ₾</h1>
+<p class="sub">ჩატბოტი და საიტი ფასს ამ ცხრილიდან ითვლის, სეზონის მიხედვით. ახალი წელი: 25 დეკ – 7 იან; ზამთარი: დეკ–მარ; ზაფხული: ივნ–აგვ.</p>
+<div class="scroll"><table class="prices" id="prices"></table></div>
+<p class="note">ფასები, ნომრების განაწილება და ჯავშნები სანიმუშოა. მონაცემები ამ ბრაუზერში ინახება. <button class="btn" id="resetBtn" style="margin-left:8px">დემოს თავიდან დაწყება</button></p>
+</section>
+</main>
+</div>
+
+<dialog id="dlg">
+<form method="dialog" id="addForm">
+<h1 style="font-size:19px">ჯავშნის დამატება</h1>
+<label for="aRoom">ნომერი<select id="aRoom"></select></label>
+<div class="row">
+<label for="aFrom">შესვლა<input id="aFrom" type="date" required></label>
+<label for="aN">ღამე<input id="aN" type="number" min="1" max="30" value="2" required></label>
+</div>
+<div class="row">
+<label for="aName">სახელი<input id="aName" required></label>
+<label for="aTel">ტელეფონი<input id="aTel" type="tel"></label>
+</div>
+<p class="msg" id="aMsg" hidden></p>
+<div class="acts"><button class="btn" value="cancel" formnovalidate>გაუქმება</button><button class="btn pri" id="aSave" value="save">შენახვა</button></div>
+</form>
+</dialog>
+
+<dialog id="info">
+<form method="dialog" style="padding:22px;display:grid;gap:12px">
+<div id="infoBody"></div>
+<div class="acts" style="display:flex;justify-content:flex-end;gap:8px"><button class="btn nob" value="del" id="infoDel">წაშლა</button><button class="btn pri" value="close">დახურვა</button></div>
+</form>
+</dialog>
+
+<script src="js/store.js"></script>
+<script>
+{
+const J=JIJI,$=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const SRC={site:'საიტი',chat:'ჩატბოტი',admin:'ხელით',instagram:'Instagram',facebook:'Facebook'};
+const typeName=t=>J.types[t]?.name||t;
+
+/* --- PIN gate (demo only; the real version uses proper login) --- */
+const unlock=()=>{$('gate').hidden=true;$('app').hidden=false;renderAll()};
+let ok=false;try{ok=sessionStorage.getItem('jiji-admin')==='1'}catch(e){}
+if(ok)unlock();
+$('gateForm').addEventListener('submit',e=>{e.preventDefault();if($('pin').value==='1234'){try{sessionStorage.setItem('jiji-admin','1')}catch(e){}unlock()}else{$('pinMsg').hidden=false}});
+
+/* --- tabs --- */
+const tabs=[...document.querySelectorAll('.tab')];
+tabs.forEach(t=>t.addEventListener('click',()=>{tabs.forEach(x=>{const on=x===t;x.setAttribute('aria-selected',on);$('p-'+x.dataset.tab).hidden=!on})}));
+
+/* --- requests --- */
+function renderReqs(){
+ const pend=J.bookings.filter(b=>b.status==='pending').sort((a,b)=>a.from<b.from?-1:1);
+ $('cnt').textContent=pend.length;
+ $('reqs').innerHTML=pend.length?pend.map(b=>{const n=J.nights(b.from,b.to);return `<article class="req">
+  <div class="top"><div><div class="who">${esc(b.name)}</div><a class="tel" href="tel:${esc(b.phone.replace(/\s/g,''))}">${esc(b.phone)}</a></div><span class="pill p-wait">მოლოდინში</span></div>
+  <dl><dt>თარიღი</dt><dd>${J.fmtRange(b.from,b.to)} · ${n} ღამე</dd><dt>სტუმრები</dt><dd>${b.guests}</dd><dt>ნომერი</dt><dd>${esc(typeName(b.type))}</dd><dt>წყარო</dt><dd>${SRC[b.source]||b.source}</dd></dl>
+  <div class="top" style="align-items:center"><span class="sum">${J.quote(b.type,b.from,b.to)} ₾</span><div class="acts"><button class="btn nob" data-no="${b.id}">უარყოფა</button><button class="btn okb" data-ok="${b.id}">დადასტურება</button></div></div>
+ </article>`}).join(''):'<div class="empty">ახალი მოთხოვნა არ არის. სცადეთ საიტის ჩატბოტით ან ფორმით.</div>';
+ const done=J.bookings.filter(b=>b.status!=='pending').sort((a,b)=>a.created<b.created?1:-1).slice(0,30);
+ $('hist').innerHTML=done.map(b=>`<tr><td>${esc(b.name)}</td><td>${J.fmtRange(b.from,b.to)}</td><td>${b.room||'—'}</td><td>${SRC[b.source]||b.source}</td><td><span class="pill ${b.status==='confirmed'?'p-ok':'p-no'}">${b.status==='confirmed'?'დადასტურებული':'უარყოფილი'}</span></td></tr>`).join('');
+}
+$('reqs').addEventListener('click',e=>{
+ const okId=e.target.closest('[data-ok]')?.dataset.ok,noId=e.target.closest('[data-no]')?.dataset.no;
+ if(okId){const r=J.confirm(okId);flash(r.ok?'დადასტურდა, ნომერი '+r.room+'. დაურეკეთ სტუმარს და შეატყობინეთ.':r.msg,r.ok);renderAll()}
+ if(noId){J.decline(noId);flash('მოთხოვნა უარყოფილია.',true);renderAll()}
+});
+function flash(t,good){$('flash').innerHTML=`<p class="msg ${good?'good':''}">${esc(t)}</p>`;clearTimeout(flash.t);flash.t=setTimeout(()=>$('flash').innerHTML='',6000)}
+
+/* --- calendar: 10 rooms x 14 days --- */
+let start=J.today();const DAYS=14;
+function renderCal(){
+ const days=Array.from({length:DAYS},(_,i)=>J.addDays(start,i)),end=J.addDays(start,DAYS),t=J.today();
+ $('range').textContent=J.fmtRange(start,J.addDays(end,-1));
+ let h='<thead><tr><th class="room">ნომერი</th>'+days.map(d=>{const w=J.weekday(d);return `<th class="${d===t?'td':(w==='შბ'||w==='კვ')?'we':''}">${w}<br>${J.fmt(d)}</th>`}).join('')+'</tr></thead><tbody>';
+ const conf=J.bookings.filter(b=>b.status==='confirmed');
+ const pend=J.bookings.filter(b=>b.status==='pending');
+ h+='<tr class="pend"><th class="room">მოთხოვნები</th>'+days.map(d=>{const c=pend.filter(b=>b.from<=d&&d<b.to).length;return `<td>${c?`<span class="pc" title="${c} მოთხოვნა">${c}</span>`:''}</td>`}).join('')+'</tr>';
+ for(const r of J.ROOMS){
+  h+=`<tr><th class="room">${r.id}<small>${esc(typeName(r.type))}</small></th>`;
+  let i=0;
+  while(i<DAYS){
+   const d=days[i],b=conf.find(x=>x.room===r.id&&x.from<=d&&d<x.to);
+   if(b){const until=b.to<end?b.to:end,span=J.nights(d,until);h+=`<td colspan="${span}"><button class="bk ${b.from===d?'start':''}" data-id="${b.id}" title="${esc(b.name)}, ${J.fmtRange(b.from,b.to)}">${esc(b.name)}</button></td>`;i+=span}
+   else{h+=`<td><button class="cell" data-room="${r.id}" data-day="${d}" aria-label="ნომერი ${r.id}, ${J.fmt(d)}, თავისუფალი"></button></td>`;i++}
+  }
+  h+='</tr>';
+ }
+ $('cal').innerHTML=h+'</tbody>';
+}
+$('prev').onclick=()=>{start=J.addDays(start,-7);renderCal()};
+$('next').onclick=()=>{start=J.addDays(start,7);renderCal()};
+$('todayBtn').onclick=()=>{start=J.today();renderCal()};
+$('cal').addEventListener('click',e=>{
+ const c=e.target.closest('.cell');if(c)return openAdd(c.dataset.room,c.dataset.day);
+ const b=e.target.closest('.bk');if(b)openInfo(b.dataset.id);
+});
+
+/* --- add booking dialog --- */
+$('aRoom').innerHTML=J.ROOMS.map(r=>`<option value="${r.id}">${r.id} · ${esc(typeName(r.type))}</option>`).join('');
+function openAdd(room,day){$('aRoom').value=room||J.ROOMS[0].id;$('aFrom').value=day||J.today();$('aN').value=2;$('aName').value='';$('aTel').value='';$('aMsg').hidden=true;$('dlg').showModal()}
+$('addBtn').onclick=()=>openAdd();
+$('aSave').addEventListener('click',e=>{
+ e.preventDefault();const f=$('aFrom').value,n=Math.max(1,+$('aN').value||1),nm=$('aName').value.trim();
+ if(!f||!nm){$('aMsg').textContent='შეავსეთ თარიღი და სახელი.';$('aMsg').hidden=false;return}
+ const r=J.addManual({room:$('aRoom').value,from:f,to:J.addDays(f,n),name:nm,phone:$('aTel').value.trim(),guests:J.types[J.ROOMS.find(x=>x.id===$('aRoom').value).type].cap});
+ if(!r.ok){$('aMsg').textContent=r.msg;$('aMsg').hidden=false;return}
+ $('dlg').close();renderAll();
+});
+
+/* --- booking info dialog --- */
+let infoId=null;
+function openInfo(id){const b=J.bookings.find(x=>x.id===id);if(!b)return;infoId=id;
+ $('infoBody').innerHTML=`<h1 style="font-size:19px">${esc(b.name)}</h1><p class="sub" style="margin:0">${esc(b.phone||'')}</p><p style="margin:8px 0 0">ნომერი ${b.room} · ${esc(typeName(b.type))}<br>${J.fmtRange(b.from,b.to)} · ${J.nights(b.from,b.to)} ღამე<br>${J.quote(b.type,b.from,b.to)} ₾ · ${SRC[b.source]||b.source}</p>`;
+ $('info').showModal()}
+$('info').addEventListener('close',()=>{if($('info').returnValue==='del'&&infoId){J.remove(infoId);renderAll()}infoId=null});
+
+/* --- prices --- */
+function renderPrices(){
+ const S=J.SEASONS;
+ $('prices').innerHTML='<thead><tr><th>ნომერი</th>'+Object.values(S).map(s=>`<th>${s}</th>`).join('')+'</tr></thead><tbody>'+
+  Object.entries(J.types).map(([k,t])=>`<tr><td>${esc(t.name)}<br><span class="src">${t.cap} სტუმარი</span></td>`+Object.keys(S).map(s=>`<td><input type="number" min="0" step="10" inputmode="numeric" value="${t.price[s]}" data-t="${k}" data-s="${s}" aria-label="${esc(t.name)}, ${S[s]}"></td>`).join('')+'</tr>').join('')+'</tbody>';
+}
+$('prices').addEventListener('change',e=>{const i=e.target.closest('input');if(i){J.setPrice(i.dataset.t,i.dataset.s,i.value);renderReqs()}});
+$('resetBtn').onclick=()=>{J.reset();start=J.today();renderAll();flash('დემო თავიდან დაიწყო.',true)};
+
+function renderAll(){renderReqs();renderCal();renderPrices()}
+J.onChange(()=>{if(!$('app').hidden)renderAll()});
+}
+</script>
+</body>
+</html>
