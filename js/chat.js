@@ -68,7 +68,7 @@
 
   // ---------- flow ----------
   function start() {
-    bot('გამარჯობა! Villa JIJI-ში მოგესალმებით.\nთავისუფალ ნომრებს და ფასს წამებში გეტყვით.');
+    bot('გამარჯობა! ვილა ჯიჯიში მოგესალმებით.\nთავისუფალ ნომრებს და ფასს წამებში გეტყვით.');
     menu();
   }
   function menu() {
@@ -78,7 +78,7 @@
       { t: 'თავისუფალი ნომრები და ფასი', f: askDate },
       { t: 'სად ვართ', f: location },
       { t: 'ხშირი კითხვები', f: faq },
-      { t: 'სასტუმროსთან დაკავშირება', f: contact }
+      { t: 'ვილა ჯიჯისთან დაკავშირება', f: contact }
     ]);
   }
   // ---------- inline calendar: tap check-in, then check-out ----------
@@ -150,15 +150,15 @@
       bot(offerHtml(nx.from, nx.to, ctx.n, g, nx), 'offer');
       options([
         { t: 'ეს მინდა', f: () => { ctx.from = nx.from; ctx.to = nx.to; ctx.offer = nx; askName(); } },
-        { t: 'სხვა თარიღი', f: askDate }, { t: 'სასტუმროსთან დაკავშირება', f: contact, sub: true }
+        { t: 'სხვა თარიღი', f: askDate }, { t: 'ვილა ჯიჯისთან დაკავშირება', f: contact, sub: true }
       ]);
     } else {
       bot('ამ პერიოდში ადგილი აღარ გვაქვს. დაგვიკავშირდით და იქნებ მაინც მოგიძებნოთ გამოსავალი.');
-      options([{ t: 'სასტუმროსთან დაკავშირება', f: contact }, { t: 'სხვა თარიღი', f: askDate }, ...nav()]);
+      options([{ t: 'ვილა ჯიჯისთან დაკავშირება', f: contact }, { t: 'სხვა თარიღი', f: askDate }, ...nav()]);
     }
   }
   function group() {
-    bot('7 და მეტი სტუმრისთვის რამდენიმე ნომერს გავაერთიანებთ. ამას სასტუმრო პირადად შეგითანხმებთ.');
+    bot('7 და მეტი სტუმრისთვის რამდენიმე ნომერს გავაერთიანებთ. ამას ვილა ჯიჯი პირადად შეგითანხმებთ.');
     contact(true);
   }
   function askName() { bot('თქვენი სახელი?'); mode = 'name'; setInput('text', 'სახელი'); options(nav()); }
@@ -166,7 +166,7 @@
   function finish() {
     const r = J.createRequest({ from: ctx.from, to: ctx.to, guests: ctx.g, name: ctx.name, phone: ctx.phone, source: 'chat', type: ctx.offer.type });
     mode = 'menu'; setInput(null);
-    bot(`მოთხოვნა მიღებულია.\n${J.fmtRange(r.from, r.to)} · ${esc(ctx.offer.name)} · ${ctx.offer.total} ₾\n\nსასტუმრო დაგიკავშირდებათ ნომერზე ${esc(ctx.phone)} ჯავშნის დასადასტურებლად. გადახდა საჭირო არ არის.`);
+    bot(`მოთხოვნა მიღებულია.\n${J.fmtRange(r.from, r.to)} · ${esc(ctx.offer.name)} · ${ctx.offer.total} ₾\n\nვილა ჯიჯი დაგიკავშირდებათ ნომერზე ${esc(ctx.phone)} ჯავშნის დასადასტურებლად. გადახდა საჭირო არ არის.`);
     options(nav());
   }
   function location() {
@@ -177,16 +177,16 @@
     ['საუზმე შედის?', 'დიახ, საუზმე ფასში შედის.'],
     ['ცხოველით შეიძლება?', 'დიახ, შინაური ცხოველებით მოსვლა შეიძლება. წინასწარ გაგვაფრთხილეთ.'],
     ['პარკინგი გაქვთ?', 'დიახ, პარკინგი უფასოა.'],
-    ['აუზი როდის მუშაობს?', 'ღია აუზი სეზონურია, თბილ თვეებში მუშაობს. ზუსტ თარიღებს სასტუმრო გეტყვით.'],
+    ['აუზი როდის მუშაობს?', 'ღია აუზი სეზონურია, თბილ თვეებში მუშაობს. ზუსტ თარიღებს ვილა ჯიჯი გეტყვით.'],
     ['შესვლის და გასვლის დრო', 'ზუსტ საათებს ჯავშნის დადასტურებისას გეტყვით. მიღება ყოველდღე 10:00–20:00.'],
-    ['სკი-პასი და ინვენტარი', 'სკი-პასს ვილაში იყიდით. საბაგირო ახლოსაა.']
+    ['სკი-პასი და ინვენტარი', 'სკი-პასს ვილა ჯიჯიში იყიდით. საბაგირო ახლოსაა.']
   ];
   function faq() {
     bot('აირჩიეთ კითხვა:');
     options(FAQ.map(([q, a]) => ({ t: q, f: () => { bot(a); options([{ t: 'სხვა კითხვა', f: faq }, { t: 'თავისუფალი ნომრები', f: askDate }, ...nav()]); } })).concat(nav()));
   }
   function contact(silent) {
-    if (silent !== true) bot('სასტუმროს ადმინისტრაცია გიპასუხებთ.');
+    if (silent !== true) bot('ვილა ჯიჯის ადმინისტრაცია გიპასუხებთ.');
     bot(`ტელეფონი: ${PHONE}\nყოველდღე 10:00–20:00\n<a href="${WA}" target="_blank" rel="noopener">WhatsApp-ზე მიწერა</a>`);
     options(nav());
   }
@@ -202,7 +202,7 @@
       ctx.phone = v; finish(); return;
     }
     me(v); misses++;
-    if (misses >= 2) { misses = 0; bot('ვერ გავიგე. სასტუმროსთან დაგაკავშირებთ.'); contact(true); }
+    if (misses >= 2) { misses = 0; bot('ვერ გავიგე. ვილა ჯიჯისთან დაგაკავშირებთ.'); contact(true); }
     else { bot('ვერ გავიგე. აირჩიეთ ერთ-ერთი ღილაკი.'); menu(); }
   });
   // In menu mode a typed message is allowed too (counts as a miss), so keep the input visible there.
