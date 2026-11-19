@@ -15,7 +15,7 @@ window.JIJI = (() => {
   const ROOMS = [
     { id: '101', type: 'double' }, { id: '102', type: 'double' }, { id: '103', type: 'family' },
     { id: '201', type: 'double' }, { id: '202', type: 'double' }, { id: '203', type: 'family' },
-    { id: '204', type: 'family' }, { id: '301', type: 'duplex' }, { id: '302', type: 'lux' },
+    { id: '204', type: 'duplex' }, { id: '301', type: 'duplex' }, { id: '302', type: 'lux' },
     { id: '303', type: 'lux' }
   ];
   const SEASONS = { peak: 'ახალი წელი', winter: 'ზამთარი', summer: 'ზაფხული', off: 'დანარჩენი' };
