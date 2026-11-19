@@ -128,7 +128,7 @@
   function askGuests() {
     bot('რამდენი სტუმარი?');
     options([
-      { t: '2', f: () => check(2) }, { t: '3–4', f: () => check(4) }, { t: '5–6', f: () => check(6) },
+      ...[1, 2, 3, 4, 5, 6].map(n => ({ t: String(n), f: () => check(n) })),
       { t: '7 ან მეტი', f: group }, ...nav()
     ]);
   }

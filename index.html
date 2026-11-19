@@ -162,6 +162,8 @@ p{margin:0}
 .rc ul{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
 .rc li{font-size:13px;padding:4px 10px;border-radius:999px;background:#eef2f6;color:#2b3546}
 .rc .foot{margin-top:auto;padding-top:14px;border-top:1px solid #e3e8ef;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px}
+.rc .vers{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:14px;color:#3e4a5c}
+.rc .vers b{color:var(--ink)}
 .rc .price{font-size:15px;color:#4a5668;white-space:nowrap}
 .rc .price b{font:600 24px "Noto Sans Georgian",sans-serif;color:var(--ink)}
 .rc .btn{background:var(--ink);color:#fff;min-height:44px}
@@ -399,7 +401,7 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 <label for="out">გასვლა<input id="out" type="date" required></label>
 </div>
 <div class="row">
-<label for="guests">სტუმრები<select id="guests"><option value="2">2</option><option value="4">3–4</option><option value="6">5–6</option><option value="8">7+</option></select></label>
+<label for="guests">სტუმრები<select id="guests"><option value="1">1</option><option value="2" selected>2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="8">7+</option></select></label>
 <label for="name">სახელი<input id="name" type="text" autocomplete="name"></label>
 </div>
 <label for="tel">ტელეფონი<input id="tel" type="tel" autocomplete="tel" inputmode="tel"></label>
@@ -424,12 +426,13 @@ const ROOM_TEXT={budget:'ხელმისაწვდომი ვარია
 const person='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>';
 const bed='<svg width="56" height="40" viewBox="0 0 56 40" fill="none" stroke="#8a97a8" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 34V8M4 24h48v10M4 24v-6h20v6M24 18h28v6"/><circle cx="14" cy="18" r="0"/></svg>';
 const renderRooms=()=>{document.getElementById('roomList').innerHTML=Object.entries(JIJI.types).filter(([k])=>JIJI.ROOMS.some(r=>r.type===k)).map(([k,t])=>{
- const ph=ROOM_PHOTOS[k]||[],count=JIJI.ROOMS.filter(r=>r.type===k).length,from=Math.min(...Object.values(t.price));
+ const ph=ROOM_PHOTOS[k]||[],count=JIJI.ROOMS.filter(r=>r.type===k).length,from=Math.min(...t.rates.map(JIJI.fromPrice));
  const pics=ph.length?`<div class="slides" data-k="${k}">${ph.map((u,i)=>`<img src="${u}" alt="${t.name} ნომერი, ფოტო ${i+1}" loading="lazy">`).join('')}</div>${ph.length>1?`<div class="dots">${ph.map((_,i)=>`<i class="${i?'':'on'}"></i>`).join('')}</div>`:''}`
   :`<div class="soon">${bed}<span>ნომრის ფოტოები მალე დაემატება</span></div>`;
  return `<article class="rc"><div class="ph">${pics}<span class="cap">${person}${t.cap} სტუმარი</span></div>
  <div class="body"><h3>${t.name}</h3><p class="meta">${ROOM_TEXT[k]||''}</p>
  <ul><li>${count} ნომერი</li>${(ROOM_FEATS[k]||[]).map(f=>`<li>${f}</li>`).join('')}</ul>
+ <div class="vers">${t.rates.map(r=>`<span><b>${r.guests}</b> სტუმ. · ${JIJI.fromPrice(r)} ₾-დან</span>`).join('')}</div>
  <div class="foot"><span class="price">ღამე <b>${from} ₾</b>-დან</span><button class="btn" type="button" data-chat>თავისუფალია?</button></div></div></article>`}).join('');
  document.querySelectorAll('.rc .slides').forEach(sl=>sl.addEventListener('scroll',()=>{const i=Math.round(sl.scrollLeft/sl.clientWidth);sl.parentElement.querySelectorAll('.dots i').forEach((d,j)=>d.classList.toggle('on',i===j))},{passive:true}));
 };
@@ -458,7 +461,7 @@ form.addEventListener('submit',e=>{e.preventDefault();const a=inEl.value,b=outEl
  const o=JIJI.findOffer(a,b,g),n=JIJI.nights(a,b);
  if(!o){const nx=JIJI.nextOffer(a,n,g);return say('ამ თარიღებზე ადგილი აღარ გვაქვს.'+(nx?' უახლოესი თავისუფალი: '+JIJI.fmtRange(nx.from,nx.to)+'.':''))}
  JIJI.createRequest({from:a,to:b,guests:g,name:nm,phone:ph,source:'site',type:o.type});
- form.reset();say('მოთხოვნა მიღებულია: '+JIJI.fmtRange(a,b)+', '+n+' ღამე, '+o.name+' ნომერი, '+o.total+' ₾ (სანიმუშო ფასი). სასტუმრო დაგიკავშირდებათ.')});
+ form.reset();say('მოთხოვნა მიღებულია: '+JIJI.fmtRange(a,b)+', '+n+' ღამე, '+o.name+' ნომერი '+g+' სტუმარზე, '+o.total+' ₾ (სანიმუშო ფასი). სასტუმრო დაგიკავშირდებათ.')});
 
 const nyBox=document.getElementById('nyBox');
 document.getElementById('nyPlay').addEventListener('click',()=>{nyBox.innerHTML='<video src="video/new-year.mp4" poster="video/new-year-poster.jpg" controls playsinline preload="auto"></video>';const v=nyBox.querySelector('video');v.play().catch(()=>{})});

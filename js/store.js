@@ -1,16 +1,19 @@
 /* Villa JIJI — shared data layer (demo: stored in this browser's localStorage).
    Later this file is the only one to swap for a real database (e.g. Supabase). */
 window.JIJI = (() => {
-  const KEY = 'jiji-demo-v1';
+  const KEY = 'jiji-demo-v2';
 
-  // Room types. Prices are SAMPLE values in GEL per night, by season.
+  // Room types. Each type has price "versions" by number of guests, set by the hotel
+  // (not proportional): the smallest version that fits the group is used.
+  // Prices are SAMPLE values in GEL per night, by season.
+  const R = (guests, off, summer, winter, peak) => ({ guests, price: { peak, winter, summer, off } });
   const DEFAULT_TYPES = {
-    double: { name: 'ორადგილიანი', cap: 2, price: { peak: 260, winter: 190, summer: 160, off: 120 } },
-    family: { name: 'საოჯახო, 1 საძინებლით', cap: 5, price: { peak: 380, winter: 290, summer: 240, off: 180 } },
-    budget: { name: 'საოჯახო ბიუჯეტური, 1 საძინებლით', cap: 4, price: { peak: 340, winter: 250, summer: 200, off: 150 } },
-    duplex: { name: 'დუპლექსი', cap: 4, price: { peak: 620, winter: 480, summer: 390, off: 290 } },
-    lux:    { name: 'ლუქსი', cap: 4, price: { peak: 600, winter: 460, summer: 380, off: 280 } },
-    large:  { name: 'დიდი საოჯახო', cap: 6, price: { peak: 520, winter: 400, summer: 330, off: 250 } }
+    double: { name: 'ორადგილიანი', rates: [R(1, 100, 140, 170, 230), R(2, 120, 160, 190, 260)] },
+    family: { name: 'საოჯახო, 1 საძინებლით', rates: [R(2, 150, 200, 240, 320), R(3, 165, 220, 265, 350), R(4, 180, 240, 290, 380), R(5, 195, 260, 310, 410)] },
+    budget: { name: 'საოჯახო ბიუჯეტური, 1 საძინებლით', rates: [R(2, 120, 160, 200, 270), R(3, 135, 180, 225, 305), R(4, 150, 200, 250, 340)] },
+    duplex: { name: 'დუპლექსი', rates: [R(2, 220, 300, 380, 500), R(3, 250, 340, 430, 560), R(4, 290, 390, 480, 620)] },
+    lux:    { name: 'ლუქსი', rates: [R(2, 210, 290, 370, 480), R(3, 245, 335, 415, 540), R(4, 280, 380, 460, 600)] },
+    large:  { name: 'დიდი საოჯახო', rates: [R(4, 210, 280, 340, 450), R(6, 250, 330, 400, 520)] }
   };
   // 10 rooms. The split between types is a SAMPLE, the owner sets the real one.
   const ROOMS = [
@@ -43,6 +46,12 @@ window.JIJI = (() => {
 
   // ---------- storage ----------
   let state;
+  // capacity of a type = its largest guest version
+  function syncCap(k) {
+    const t = state.types[k];
+    t.rates = (t.rates || []).filter(r => r.guests > 0).sort((a, b) => a.guests - b.guests);
+    t.cap = t.rates.length ? t.rates[t.rates.length - 1].guests : 0;
+  }
   const uid = () => Math.random().toString(36).slice(2, 9);
   function seed() {
     const t = today();
@@ -53,8 +62,10 @@ window.JIJI = (() => {
     const pending = (type, from, n, name, phone, guests, source) => ({
       id: uid(), room: null, type, from: addDays(t, from), to: addDays(t, from + n), name, phone, guests, status: 'pending', source, created: new Date().toISOString()
     });
+    const types = JSON.parse(JSON.stringify(DEFAULT_TYPES));
+    for (const k in types) types[k].cap = types[k].rates[types[k].rates.length - 1].guests;
     return {
-      types: JSON.parse(JSON.stringify(DEFAULT_TYPES)),
+      types,
       bookings: [
         b('101', 1, 3, 'ნინო ბ.', '+995 555 10 20 30', 2, 'confirmed', 'admin'),
         b('103', 2, 4, 'გიორგი მ.', '+995 555 22 33 44', 4, 'confirmed', 'site'),
@@ -70,9 +81,10 @@ window.JIJI = (() => {
   function load() {
     try { state = JSON.parse(localStorage.getItem(KEY)); } catch (e) { state = null; }
     if (!state || !state.bookings) { state = seed(); save(); return; }
+    for (const k in state.types) syncCap(k);
     // add room types introduced after this browser first saved its data
     let added = false;
-    for (const k in DEFAULT_TYPES) if (!state.types[k]) { state.types[k] = JSON.parse(JSON.stringify(DEFAULT_TYPES[k])); added = true; }
+    for (const k in DEFAULT_TYPES) if (!state.types[k]) { state.types[k] = JSON.parse(JSON.stringify(DEFAULT_TYPES[k])); syncCap(k); added = true; }
     if (added) save();
   }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* storage unavailable: demo keeps working in memory */ } }
@@ -86,20 +98,27 @@ window.JIJI = (() => {
     !confirmed().some(x => x.room === roomId && x.id !== ignoreId && overlaps(from, to, x.from, x.to));
   const freeRoomsOfType = (type, from, to) => ROOMS.filter(r => r.type === type && roomFree(r.id, from, to)).map(r => r.id);
 
-  function quote(type, from, to) {
+  // the price version used for a group: the smallest one with enough places
+  const rateFor = (type, guests) => (state.types[type]?.rates || []).find(r => r.guests >= (guests || 1)) || null;
+  function quote(type, from, to, guests) {
+    const r = rateFor(type, guests) || (state.types[type].rates || []).slice(-1)[0];
+    if (!r) return 0;
     let sum = 0;
-    for (let d = from; d < to; d = addDays(d, 1)) sum += state.types[type].price[seasonOf(d)];
+    for (let d = from; d < to; d = addDays(d, 1)) sum += r.price[seasonOf(d)];
     return sum;
   }
-  // Cheapest type that fits the guests and has a free room for the whole stay.
+  // lowest nightly price of a version (any season), for "from" prices
+  const fromPrice = r => Math.min(...Object.values(r.price));
+  // Cheapest room type that fits the guests and has a free room for the whole stay.
   function findOffer(from, to, guests) {
-    const fits = Object.keys(state.types).filter(t => state.types[t].cap >= guests)
-      .sort((a, b) => state.types[a].cap - state.types[b].cap);
-    for (const t of fits) {
-      const free = freeRoomsOfType(t, from, to);
-      if (free.length) return { type: t, name: state.types[t].name, total: quote(t, from, to), free: free.length };
+    let best = null;
+    for (const t of Object.keys(state.types)) {
+      const r = rateFor(t, guests); if (!r) continue;
+      const free = freeRoomsOfType(t, from, to); if (!free.length) continue;
+      const total = quote(t, from, to, guests);
+      if (!best || total < best.total) best = { type: t, name: state.types[t].name, total, free: free.length, rateGuests: r.guests };
     }
-    return null;
+    return best;
   }
   // Nearest start date within `days` days with the same length of stay.
   function nextOffer(from, n, guests, days = 30) {
@@ -113,7 +132,7 @@ window.JIJI = (() => {
   // ---------- actions ----------
   function createRequest({ from, to, guests, name, phone, source, type }) {
     const offer = type ? { type } : findOffer(from, to, guests);
-    const t = offer ? offer.type : (Object.keys(state.types).find(k => state.types[k].cap >= guests) || 'large');
+    const t = offer ? offer.type : (Object.keys(state.types).find(k => rateFor(k, guests)) || Object.keys(state.types)[0]);
     const req = { id: uid(), room: null, type: t, from, to, guests, name, phone, status: 'pending', source, created: new Date().toISOString() };
     state.bookings.push(req); save(); return req;
   }
@@ -130,7 +149,18 @@ window.JIJI = (() => {
     state.bookings.push({ id: uid(), room, type, from, to, name, phone, guests, status: 'confirmed', source: 'admin', created: new Date().toISOString() });
     save(); return { ok: true };
   }
-  function setPrice(type, season, value) { state.types[type].price[season] = Math.max(0, Math.round(+value || 0)); save(); }
+  function setRate(type, i, field, value) {
+    const r = state.types[type].rates[i]; if (!r) return;
+    const v = Math.max(0, Math.round(+value || 0));
+    if (field === 'guests') r.guests = Math.max(1, v); else r.price[field] = v;
+    syncCap(type); save();
+  }
+  function addRate(type) {
+    const rs = state.types[type].rates, last = rs[rs.length - 1];
+    rs.push(last ? { guests: last.guests + 1, price: { ...last.price } } : { guests: 2, price: { peak: 0, winter: 0, summer: 0, off: 0 } });
+    syncCap(type); save();
+  }
+  function removeRate(type, i) { state.types[type].rates.splice(i, 1); syncCap(type); save(); }
   function remove(id) { state.bookings = state.bookings.filter(x => x.id !== id); save(); }
 
   // Keep every open tab (site, admin) in sync.
@@ -140,7 +170,7 @@ window.JIJI = (() => {
 
   return {
     ROOMS, SEASONS, get types() { return state.types; }, get bookings() { return state.bookings; },
-    today, addDays, nights, fmt, fmtRange, weekday, seasonOf, quote, findOffer, nextOffer, roomFree,
-    createRequest, confirm, decline, addManual, setPrice, remove, reset, onChange, reload: load
+    today, addDays, nights, fmt, fmtRange, weekday, seasonOf, quote, rateFor, fromPrice, findOffer, nextOffer, roomFree,
+    createRequest, confirm, decline, addManual, setRate, addRate, removeRate, remove, reset, onChange, reload: load
   };
 })();
