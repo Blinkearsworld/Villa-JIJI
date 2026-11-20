@@ -43,30 +43,35 @@ p{margin:0}
 .swap.fade{opacity:0}
 [data-season=summer] .only-w{display:none}
 [data-season=winter] .only-s{display:none}
-@media(max-width:600px){.sw button span{display:none}.sw button{padding:0 10px}}
+@media(max-width:600px){[data-season=winter] .hero img{object-position:14% 40%}.logo svg{display:none}.sw button span{display:none}.sw button{padding:0;width:40px;justify-content:center}.top .wrap{gap:10px}.logo span{font-size:22px}.right{gap:8px}.right .btn.lamp{padding:0 14px;min-height:40px}.hero .acts .btn{flex:1 1 auto}}
 /* header */
 .top{position:fixed;inset:0 0 auto;z-index:20;transition:background .35s,backdrop-filter .35s}
 .top.solid{background:var(--bar);backdrop-filter:blur(12px)}
-.top .wrap{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px;min-height:72px}
-.nav{display:flex;gap:26px;font-size:14px}
+.top .wrap{display:flex;align-items:center;gap:28px;min-height:72px}
+.nav{display:flex;gap:24px;font-size:14px;margin-right:auto;white-space:nowrap}
 .nav a{text-decoration:none;opacity:.9}
 .nav a:hover{opacity:1;color:var(--lamp)}
 .logo{display:flex;align-items:center;gap:10px;text-decoration:none}
-.logo span{font:italic 600 26px/1 Cormorant,serif;letter-spacing:.02em}
-.right{display:flex;justify-content:flex-end;align-items:center;gap:18px;font-size:13px}
+.logo span{font:italic 600 26px/1 Cormorant,serif;letter-spacing:.02em;white-space:nowrap}
+.logo{flex:none}
+.right{display:flex;justify-content:flex-end;align-items:center;gap:14px;font-size:13px;margin-left:auto}
 .lang{display:flex;gap:10px;color:var(--mist)}
 .lang b{color:var(--snow);font-weight:500}
 
 /* hero */
 .hero{position:relative;height:min(100svh,980px);min-height:620px;overflow:hidden;background:var(--hero)}
-.hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 42%;transform:scale(1.08);animation:drift 26s ease-out forwards}
+.hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:62% 40%;transform:scale(1.06);animation:drift 26s ease-out forwards}
 @keyframes drift{to{transform:scale(1)}}
-.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,16,28,.55) 0,rgba(7,16,28,0) 26%,rgba(7,16,28,0) 50%,rgba(7,16,28,.85) 100%)}
+.hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,16,28,.6) 0,rgba(7,16,28,0) 18%),linear-gradient(0deg,rgba(7,16,28,.9) 0,rgba(7,16,28,.35) 34%,rgba(7,16,28,0) 55%),linear-gradient(90deg,rgba(7,16,28,.55) 0,rgba(7,16,28,0) 45%)}
 #snow{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none}
 .hero .cap{position:absolute;z-index:2;left:0;right:0;bottom:clamp(28px,6vh,64px)}
-.hero .cap .wrap{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:24px}
-.name{font:italic 500 clamp(76px,13vw,200px)/.85 Cormorant,serif;letter-spacing:-.02em}
-.tag{font:300 clamp(22px,2.4vw,34px)/1.3 "Noto Serif Georgian",serif;margin-top:14px}
+.hero .cap .wrap{display:block}
+.name{font:italic 500 clamp(56px,7.5vw,112px)/.9 Cormorant,serif;letter-spacing:-.01em}
+.tag{font:300 clamp(19px,1.8vw,26px)/1.35 "Noto Serif Georgian",serif;margin-top:12px;max-width:520px}
+.eyebrow{font-size:13px;letter-spacing:.06em;color:#dfe6ef;margin-bottom:14px}
+.hero .acts{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
+body.at-hero .jc-fab{opacity:0;pointer-events:none;transform:translateY(12px)}
+.jc-fab{transition:opacity .3s,transform .3s}
 .side{max-width:300px;font-size:15px;color:#dbe3ee;display:grid;gap:18px}
 
 /* statement */
@@ -205,9 +210,9 @@ input,select{min-height:48px;padding:0 14px;border-radius:6px;border:1px solid r
 footer{margin-top:clamp(70px,9vw,120px);border-top:1px solid var(--line);padding-top:26px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:12px;color:var(--mist);font-size:14px}
 footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)}
 
+@media(max-width:1100px){.nav{display:none}}
 @media(max-width:860px){
 .nav{display:none}
-.top .wrap{grid-template-columns:auto 1fr}
 .state .wrap,.fire .wrap,.book .grid{grid-template-columns:minmax(0,1fr)}
 .state img{aspect-ratio:16/10;order:2}
 .seasons{flex-direction:column;height:auto}
@@ -227,20 +232,17 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 
 <header class="top" id="top">
 <div class="wrap">
-<nav class="nav" aria-label="მენიუ">
-<a href="#seasons">სეზონები</a>
-<a href="#fire">ბუხრის ოთახი</a>
-<a class="only-w" href="#newyear">ახალი წელი</a>
-<a class="only-s" href="#summer">ზაფხული</a>
-<a href="#spaces">სივრცეები</a>
-<a href="#grounds">ეზო</a>
-<a href="#near">ახლოს</a>
-<a href="#rooms">ნომრები</a>
-</nav>
 <a class="logo" href="#hero" aria-label="Villa JIJI, მთავარი">
 <svg width="40" height="24" viewBox="0 0 46 28" fill="none" stroke="#f3c27a" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" aria-hidden="true"><path d="M2 19 15 6l10 9"/><path d="M19 11 30 1.5 44 15"/><path d="M9 15v11h30V12"/><path d="M22 26v-6h5v6"/></svg>
 <span>Villa JIJI</span>
 </a>
+<nav class="nav" aria-label="მენიუ">
+<a href="#rooms">ნომრები</a>
+<a href="#spaces">სივრცეები</a>
+<a href="#grounds">ეზო</a>
+<a href="#near">ახლოს</a>
+<a href="#book">კონტაქტი</a>
+</nav>
 <div class="right">
 <div class="sw" role="group" aria-label="სეზონი"><button type="button" data-set="winter" aria-pressed="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 2v20M3.3 7l17.4 10M3.3 17 20.7 7M9 4l3 2 3-2M9 20l3-2 3 2"/></svg><span>ზამთარი</span></button><button type="button" data-set="summer" aria-pressed="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1"/></svg><span>ზაფხული</span></button></div>
 <div class="lang" aria-label="ენა"><b>KA</b><span>EN</span><span>RU</span></div>
@@ -255,14 +257,10 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 <canvas id="snow" aria-hidden="true"></canvas>
 <div class="cap">
 <div class="wrap">
-<div>
+<p class="eyebrow">ბაკურიანი · თრიალეთის ქუჩა · 10 ნომერი</p>
 <h1 class="name">Villa JIJI</h1>
 <p class="tag" data-w="თოვლი გარეთ, ცეცხლი შიგნით" data-s="მზე ეზოში, მთა აივნიდან">თოვლი გარეთ, ცეცხლი შიგნით</p>
-</div>
-<div class="side">
-<p data-w="ოჯახური შალე ბაკურიანში, კოხტას საბაგიროდან 300 მეტრში. ათი ნომერი, ბუხარი და ახალი წლის სუფრა." data-s="ოჯახური შალე ბაკურიანში. ათი ნომერი, აუზი მზიან ეზოში, ბატუტი ბავშვებისთვის და ტყე ფეხის ნაბიჯზე.">ოჯახური შალე ბაკურიანში, კოხტას საბაგიროდან 300 მეტრში. ათი ნომერი, ბუხარი და ახალი წლის სუფრა.</p>
-<div><a class="btn ghost" href="#book">თარიღის შერჩევა</a></div>
-</div>
+<div class="acts"><button class="btn lamp" type="button" id="heroFree">თავისუფალი ნომრები</button><a class="btn ghost" href="#rooms">ნომრების ნახვა</a></div>
 </div>
 </div>
 </section>
@@ -271,11 +269,11 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 <div class="wrap">
 <img class="swap" src="img/birch.jpg" alt="ვილა ჯიჯის ფასადი არყის ფოთლებს მიღმა" loading="lazy" data-w="img/winter/day-flag.jpg|ვილა ჯიჯი თოვლიან დღეს, ქართული დროშით" data-s="img/birch.jpg|ვილა ჯიჯის ფასადი არყის ფოთლებს მიღმა">
 <div>
-<p class="big">ქვისა და ხისგან ნაშენი სამსართულიანი სახლი თრიალეთის ქუჩაზე. დილით ფანჯრიდან დიდველი ჩანს, საღამოს ეზოში გირლიანდები ინთება, ლაუნჯში კი ბუხარი.</p>
+<p class="big">ოჯახური სახლი ბაკურიანში, სადაც დასვენება მარტივია: ათი კომფორტული ნომერი, ბუხრის ოთახი საღამოებისთვის, დიდი ეზო ბავშვებისთვის და კოხტას საბაგირო 300 მეტრში.</p>
 <div class="facts">
 <div><b>10</b>ნომერი</div>
 <div><b>3</b>სართული</div>
-<div><b>18 კმ</b>ბორჯომამდე</div>
+<div><b>300 მ</b>საბაგირომდე</div>
 </div>
 </div>
 </div>
@@ -289,7 +287,7 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 </button>
 <button class="pane only-s" type="button" aria-expanded="false">
 <img src="img/summer/pool-kids.jpg" alt="" loading="lazy">
-<span class="txt"><h3>ზაფხული</h3><p>აუზი მზიან ეზოში, გაზონი, საქანელა და მაყალი. ტყის ბილიკები ახლოსაა, ბორჯომი 18 კმ-ში.</p></span>
+<span class="txt"><h3>ზაფხული</h3><p>აუზი მზიან ეზოში, გაზონი, საქანელა და მაყალი. ტყის ბილიკები ახლოსაა.</p></span>
 </button>
 </div>
 
@@ -406,7 +404,7 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 <div class="wrap">
 <h2>რა არის ახლოს</h2>
 <p class="lead">ვილა ჯიჯი თრიალეთის ქუჩაზე დგას. მაღაზიები და აფთიაქი ფეხით მისასვლელ მანძილზეა.</p>
-<div class="near"><div class="nr"><h3>საბაგირო კოხტაზე</h3><p data-w="გონდოლა და სათხილამურო ფერდობი" data-s="გონდოლა ხედით მთელ ბაკურიანზე">გონდოლა მთის ფერდობზე, ზამთარში სათხილამუროდ</p><span class="d">300 მ</span></div><div class="nr"><h3>ბაკურიანის გასართობი პარკი</h3><p data-w="სასრიალო, ციგები და კაფეები" data-s="საბავშვო მოედნები, ატრაქციონები, კაფეები">საბავშვო მოედნები, კაფეები, ზამთარში სასრიალო</p><span class="d">1,8 კმ</span></div><div class="nr"><h3>რკინიგზის სადგური</h3><p>ვიწროლიანდაგიანი "კუკუშკა" ბორჯომისკენ</p><span class="d">2,6 კმ</span></div><div class="nr"><h3>დიდველის საბაგირო</h3><p data-w="ბაკურიანის მთავარი სათხილამურო ზონა" data-s="საბაგირო, ტობოგანი და პანორამა">ბაკურიანის მთავარი სათხილამურო ზონა, ზაფხულში ტობოგანი</p><span class="d">2,9 კმ</span></div><div class="nr"><h3>ალპური ბოტანიკური ბაღი</h3><p data-w="თოვლიანი ფიჭვის ტყე" data-s="ფიჭვისა და ნაძვის ტყე, ჩანჩქერი">ფიჭვისა და ნაძვის ტყე, ჩანჩქერი</p><span class="d">2,9 კმ</span></div><div class="nr"><h3>კოხტა-მითარბი</h3><p data-w="გრძელი ტრასები გამოცდილი მოთხილამურეებისთვის" data-s="ღია საბაგიროები და ხედები მთიდან">გრძელი ტრასები გამოცდილი მოთხილამურეებისთვის</p><span class="d">3,7 კმ</span></div><div class="nr"><h3>ბორჯომი</h3><p>მინერალური წყლების ცენტრალური პარკი</p><span class="d">18 კმ</span></div></div>
+<div class="near"><div class="nr"><h3>საბაგირო კოხტაზე</h3><p data-w="გონდოლა და სათხილამურო ფერდობი" data-s="გონდოლა ხედით მთელ ბაკურიანზე">გონდოლა მთის ფერდობზე, ზამთარში სათხილამუროდ</p><span class="d">300 მ</span></div><div class="nr"><h3>ბაკურიანის გასართობი პარკი</h3><p data-w="სასრიალო, ციგები და კაფეები" data-s="საბავშვო მოედნები, ატრაქციონები, კაფეები">საბავშვო მოედნები, კაფეები, ზამთარში სასრიალო</p><span class="d">1,8 კმ</span></div><div class="nr"><h3>რკინიგზის სადგური</h3><p>ვიწროლიანდაგიანი "კუკუშკა" ბორჯომისკენ</p><span class="d">2,6 კმ</span></div><div class="nr"><h3>დიდველის საბაგირო</h3><p data-w="ბაკურიანის მთავარი სათხილამურო ზონა" data-s="საბაგირო, ტობოგანი და პანორამა">ბაკურიანის მთავარი სათხილამურო ზონა, ზაფხულში ტობოგანი</p><span class="d">2,9 კმ</span></div><div class="nr"><h3>ალპური ბოტანიკური ბაღი</h3><p data-w="თოვლიანი ფიჭვის ტყე" data-s="ფიჭვისა და ნაძვის ტყე, ჩანჩქერი">ფიჭვისა და ნაძვის ტყე, ჩანჩქერი</p><span class="d">2,9 კმ</span></div><div class="nr"><h3>კოხტა-მითარბი</h3><p data-w="გრძელი ტრასები გამოცდილი მოთხილამურეებისთვის" data-s="ღია საბაგიროები და ხედები მთიდან">გრძელი ტრასები გამოცდილი მოთხილამურეებისთვის</p><span class="d">3,7 კმ</span></div></div>
 <p class="small">მანძილი ვილა ჯიჯიდან პირდაპირ ხაზზეა დათვლილი, გზით ცოტა მეტი იქნება.</p>
 </div>
 </section>
@@ -436,7 +434,7 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 <div><b>მისამართი</b><a href="https://www.google.com/maps/search/?api=1&amp;query=41.7318533,43.5301119">თრიალეთის ქუჩა, ბაკურიანი</a></div>
 <div><b>მიღება</b>ყოველდღე, 10:00–20:00</div>
 <div><b>ტელეფონი</b>+995 596 90 40 60</div>
-<div><b>ბორჯომიდან</b>18 კმ</div>
+<div><b>საბაგირომდე</b>300 მ</div>
 </div>
 </div>
 <form id="req" novalidate>
@@ -523,6 +521,9 @@ form.addEventListener('submit',e=>{e.preventDefault();const a=inEl.value,b=outEl
  JIJI.createRequest({from:a,to:b,guests:g,name:nm,phone:ph,source:'site',type:o.type});
  form.reset();say('მოთხოვნა მიღებულია: '+JIJI.fmtRange(a,b)+', '+n+' ღამე, '+o.name+' ნომერი '+g+' სტუმარზე, '+o.total+' ₾ (სანიმუშო ფასი). ვილა ჯიჯი დაგიკავშირდებათ.')});
 
+document.getElementById('heroFree').addEventListener('click',()=>window.JIJIChat?.open());
+const heroEl=document.getElementById('hero');
+const heroIO=new IntersectionObserver(es=>document.body.classList.toggle('at-hero',es[0].isIntersecting&&es[0].intersectionRatio>.35),{threshold:[0,.35,.6]});heroIO.observe(heroEl);
 const nyBox=document.getElementById('nyBox');
 document.getElementById('nyPlay').addEventListener('click',()=>{nyBox.innerHTML='<video src="video/new-year.mp4" poster="video/new-year-poster.jpg" controls playsinline preload="auto"></video>';const v=nyBox.querySelector('video');v.play().catch(()=>{})});
 document.getElementById('summer').addEventListener('click',e=>{if(e.target.closest('[data-chat]'))window.JIJIChat?.open()});
