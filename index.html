@@ -522,7 +522,7 @@ document.getElementById('summer').addEventListener('click',e=>{if(e.target.close
 document.getElementById('newyear').addEventListener('click',e=>{if(e.target.closest('[data-chat]'))window.JIJIChat?.open()});
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const cv=document.getElementById('snow'),cx=cv.getContext('2d');
-let W=0,H=0,flakes=[],run=!reduce,raf=0;
+let W=0,H=0,flakes=[],run=false,raf=0;
 const size=()=>{const d=Math.min(devicePixelRatio||1,2);W=cv.clientWidth;H=cv.clientHeight;cv.width=W*d;cv.height=H*d;cx.setTransform(d,0,0,d,0,0);
  const n=Math.round(Math.min(220,W*H/7000)*(root.dataset.season==='summer'?.35:1));flakes=Array.from({length:n},()=>({x:Math.random()*W,y:Math.random()*H,r:Math.random()*2.2+.6,s:Math.random()*.6+.3,w:Math.random()*Math.PI*2}))};
 const tick=()=>{cx.clearRect(0,0,W,H);const sum=root.dataset.season==='summer';cx.fillStyle=sum?'rgba(255,214,140,.75)':'rgba(255,255,255,.85)';
