@@ -107,13 +107,15 @@
           <div class="jc-cal-w"><span>ორ</span><span>სმ</span><span>ოთ</span><span>ხთ</span><span>პრ</span><span>შბ</span><span>კვ</span></div>
           <div class="jc-cal-g">${cells}</div>
           <div class="jc-cal-s">${status}</div>
+          <div class="jc-cal-nav"><button type="button" data-nav="-1" ${atStart ? 'disabled' : ''}>‹ ${MONTHS_FULL[(m + 11) % 12]}</button><button type="button" data-nav="1">${MONTHS_FULL[(m + 1) % 12]} ›</button></div>
           <button type="button" class="jc-cal-ok" ${n ? '' : 'disabled'}>გაგრძელება</button>`;
         // keep the calendar where the guest is looking; only the first render scrolls it into view
         log.scrollTop = initial ? Math.max(0, wrap.offsetTop - 8) : keep;
+        if (!initial && log.scrollTop > wrap.offsetTop) log.scrollTop = wrap.offsetTop - 8;
       }
       wrap.addEventListener('click', e => {
         const nav = e.target.closest('[data-nav]'), day = e.target.closest('[data-d]'), go = e.target.closest('.jc-cal-ok');
-        if (nav) { m += +nav.dataset.nav; if (m < 0) { m = 11; y--; } if (m > 11) { m = 0; y++; } draw(); return; }
+        if (nav) { m += +nav.dataset.nav; if (m < 0) { m = 11; y--; } if (m > 11) { m = 0; y++; } draw(); log.scrollTop = Math.max(0, wrap.offsetTop - 8); return; }
         if (day) { const s = day.dataset.d; if (!a || b || s <= a) { a = s; b = null; } else { b = s; } draw(); return; }
         if (go && a && b) {
           wrap.querySelectorAll('button').forEach(x => x.disabled = true); wrap.classList.add('done');
