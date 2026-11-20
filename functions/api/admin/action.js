@@ -1,5 +1,5 @@
 // POST /api/admin/action — {op, ...}: confirm, decline, add, remove, rates, setting.
-import { loadState, freeRooms, roomFree, uid, isDate, today, json } from '../../_lib/core.js';
+import { loadState, bestRoom, roomFree, uid, isDate, today, json } from '../../_lib/core.js';
 export async function onRequestPost({ request, env }) {
   const db = env.DB;
   let b; try { b = await request.json(); } catch { return json({ ok: false, msg: 'bad json' }, 400); }
@@ -8,7 +8,7 @@ export async function onRequestPost({ request, env }) {
   switch (b.op) {
     case 'confirm': {
       const r = find(b.id); if (!r) return json({ ok: false, msg: 'ჯავშანი ვერ მოიძებნა' });
-      const room = b.room || freeRooms(st, r.type, r.from, r.to)[0];
+      const room = b.room || bestRoom(st, r.type, r.from, r.to);
       if (!room || !roomFree(st, room, r.from, r.to, r.id)) return json({ ok: false, msg: 'ამ თარიღებზე ' + (st.types[r.type]?.name || '') + ' ნომერი თავისუფალი აღარ არის' });
       await db.prepare("UPDATE bookings SET room=?, status='confirmed' WHERE id=? AND status='pending'").bind(room, r.id).run();
       return json({ ok: true, room });
@@ -36,7 +36,7 @@ export async function onRequestPost({ request, env }) {
       return json({ ok: true });
     }
     case 'setting': {
-      if (!['seasonMode', 'winterFrom', 'winterTo'].includes(b.k)) return json({ ok: false, msg: 'bad setting' });
+      if (!['seasonMode', 'winterFrom', 'winterTo', 'gapDiscount'].includes(b.k)) return json({ ok: false, msg: 'bad setting' });
       await db.prepare('INSERT INTO settings (k,v) VALUES (?,?) ON CONFLICT(k) DO UPDATE SET v=excluded.v').bind(b.k, String(b.v).slice(0, 10)).run();
       return json({ ok: true });
     }

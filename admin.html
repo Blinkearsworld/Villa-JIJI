@@ -70,6 +70,8 @@ h2{font-size:17px;font-weight:600;margin:28px 0 12px}
 .cal thead th.room{z-index:3}
 .cell{width:100%;height:100%;border:0;background:transparent;cursor:pointer;display:block}
 .cell:hover{background:#f1f5fa}
+.cell.gap{background:repeating-linear-gradient(135deg,#fff4d6 0 6px,#ffe9b0 6px 12px)}
+.p-gap{background:#fff1c9;color:#7a5200;font-size:12px;vertical-align:middle}
 .bk{height:100%;margin:5px 0;border-radius:8px;background:var(--night);color:#fff;font-size:12px;display:flex;align-items:center;padding:0 8px;white-space:nowrap;overflow:hidden;cursor:pointer;border:0;width:calc(100% - 4px);text-align:left}
 .bk.start{margin-left:4px}
 .pend td{height:34px;background:#fffaf0}
@@ -88,6 +90,7 @@ dialog label{display:grid;gap:6px;font-size:14px;color:var(--mute)}
 dialog input,dialog select{min-height:46px;padding:0 12px;border:1px solid var(--line);border-radius:8px;font-size:16px;color:var(--ink);background:#fff}
 dialog .row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
 dialog .acts{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
+[hidden]{display:none!important}
 .gate{max-width:360px;margin:12vh auto;background:#fff;border:1px solid var(--line);border-radius:14px;padding:28px;display:grid;gap:14px}
 .gate input{min-height:50px;padding:0 14px;border:1px solid var(--line);border-radius:10px;font-size:20px;letter-spacing:.3em;text-align:center}
 @media(max-width:600px){.bar small{display:none}dialog .row{grid-template-columns:minmax(0,1fr)}.cal th.room{min-width:92px;padding:0 8px}}
@@ -128,7 +131,7 @@ dialog .acts{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
 <strong id="range"></strong>
 <button class="btn pri" id="addBtn">+ ჯავშანი</button>
 </div>
-<div class="legend"><span><i style="background:#0b1422"></i>დადასტურებული</span><span><i style="background:#fff1d9;border:1px solid #e9c98e"></i>მოთხოვნა მოლოდინში, ნომერი არ არის დაკავებული</span></div>
+<div class="legend"><span><i style="background:#0b1422"></i>დადასტურებული</span><span><i style="background:#fff1d9;border:1px solid #e9c98e"></i>მოთხოვნა მოლოდინში, ნომერი არ არის დაკავებული</span><span><i style="background:repeating-linear-gradient(135deg,#fff4d6 0 3px,#ffe9b0 3px 6px);border:1px solid #e9c98e"></i>მოკლე ფანჯარა (1–3 ღამე), ჩატბოტი სთავაზობს</span></div>
 <div class="scroll"><table class="cal" id="cal"></table></div>
 </section>
 
@@ -144,6 +147,12 @@ dialog .acts{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
 <label style="display:grid;gap:6px;font-size:14px;color:var(--mute)">ზამთარი მთავრდება<input id="sTo" type="text" inputmode="numeric" placeholder="03-31" maxlength="5" style="min-height:44px;width:110px;padding:0 10px;border:1px solid var(--line);border-radius:8px;font-size:16px"></label>
 </div>
 <p class="note" id="sNow" style="margin-top:12px"></p>
+</div>
+<div class="pcard" id="gapCard">
+<h2 style="margin:0 0 6px">მოკლე ფანჯრები</h2>
+<p class="sub" style="margin:0 0 14px">1–3 თავისუფალი ღამე ორ ჯავშანს შორის. ჩატბოტი (საიტი, Instagram, Facebook) მათ ცალკე შესთავაზებს ამ ფასდაკლებით. დადასტურებისას სისტემა ნომერს ისე არჩევს, რომ ახალი ფანჯრები არ გაჩნდეს.</p>
+<label style="display:grid;gap:6px;font-size:14px;color:var(--mute);width:max-content">ფასდაკლება, %<input id="gDisc" type="number" min="0" max="50" step="1" style="min-height:44px;width:110px;padding:0 10px;border:1px solid var(--line);border-radius:8px;font-size:16px"></label>
+<ul id="gapList" style="margin:14px 0 0;padding-left:18px;line-height:1.7"></ul>
 </div>
 <div id="prices"></div>
 <p class="note">ფასები, ნომრების განაწილება და ჯავშნები სანიმუშოა. მონაცემები ამ ბრაუზერში ინახება. <button class="btn" id="resetBtn" style="margin-left:8px">დემოს თავიდან დაწყება</button></p>
@@ -175,7 +184,7 @@ dialog .acts{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
 </form>
 </dialog>
 
-<script src="js/store.js?v=202611191935"></script>
+<script src="js/store.js?v=202611200340"></script>
 <script>
 {
 const J=JIJI,$=id=>document.getElementById(id);
@@ -203,7 +212,7 @@ function renderReqs(){
  $('reqs').innerHTML=pend.length?pend.map(b=>{const n=J.nights(b.from,b.to);return `<article class="req">
   <div class="top"><div><div class="who">${esc(b.name)}</div><a class="tel" href="tel:${esc(b.phone.replace(/\s/g,''))}">${esc(b.phone)}</a></div><span class="pill p-wait">მოლოდინში</span></div>
   <dl><dt>თარიღი</dt><dd>${J.fmtRange(b.from,b.to)} · ${n} ღამე</dd><dt>სტუმრები</dt><dd>${b.guests}</dd><dt>ნომერი</dt><dd>${esc(typeName(b.type))}</dd><dt>წყარო</dt><dd>${SRC[b.source]||b.source}</dd></dl>
-  <div class="top" style="align-items:center"><span class="sum">${J.quote(b.type,b.from,b.to,b.guests)} ₾</span><div class="acts"><button class="btn nob" data-no="${b.id}">უარყოფა</button><button class="btn okb" data-ok="${b.id}">დადასტურება</button></div></div>
+  <div class="top" style="align-items:center"><span class="sum">${b.price??J.quote(b.type,b.from,b.to,b.guests)} ₾${b.note?` <small class="pill p-gap">${esc(b.note)}</small>`:''}</span><div class="acts"><button class="btn nob" data-no="${b.id}">უარყოფა</button><button class="btn okb" data-ok="${b.id}">დადასტურება</button></div></div>
  </article>`}).join(''):'<div class="empty">ახალი მოთხოვნა არ არის. სცადეთ საიტის ჩატბოტით ან ფორმით.</div>';
  const done=J.bookings.filter(b=>b.status!=='pending').sort((a,b)=>a.created<b.created?1:-1).slice(0,30);
  $('hist').innerHTML=done.map(b=>`<tr><td>${esc(b.name)}</td><td>${J.fmtRange(b.from,b.to)}</td><td>${b.room||'—'}</td><td>${SRC[b.source]||b.source}</td><td><span class="pill ${b.status==='confirmed'?'p-ok':'p-no'}">${b.status==='confirmed'?'დადასტურებული':'უარყოფილი'}</span></td></tr>`).join('');
@@ -223,6 +232,7 @@ function renderCal(){
  let h='<thead><tr><th class="room">ნომერი</th>'+days.map(d=>{const w=J.weekday(d);return `<th class="${d===t?'td':(w==='შბ'||w==='კვ')?'we':''}">${w}<br>${J.fmt(d)}</th>`}).join('')+'</tr></thead><tbody>';
  const conf=J.bookings.filter(b=>b.status==='confirmed');
  const pend=J.bookings.filter(b=>b.status==='pending');
+ const gp=J.gaps(90),inGap=(room,d)=>gp.some(g=>g.room===room&&g.from<=d&&d<g.to);
  h+='<tr class="pend"><th class="room">მოთხოვნები</th>'+days.map(d=>{const c=pend.filter(b=>b.from<=d&&d<b.to).length;return `<td>${c?`<span class="pc" title="${c} მოთხოვნა">${c}</span>`:''}</td>`}).join('')+'</tr>';
  for(const r of J.ROOMS){
   h+=`<tr><th class="room">${r.id}<small>${esc(typeName(r.type))}</small></th>`;
@@ -230,7 +240,7 @@ function renderCal(){
   while(i<DAYS){
    const d=days[i],b=conf.find(x=>x.room===r.id&&x.from<=d&&d<x.to);
    if(b){const until=b.to<end?b.to:end,span=J.nights(d,until);h+=`<td colspan="${span}"><button class="bk ${b.from===d?'start':''}" data-id="${b.id}" title="${esc(b.name)}, ${J.fmtRange(b.from,b.to)}">${esc(b.name)}</button></td>`;i+=span}
-   else{h+=`<td><button class="cell" data-room="${r.id}" data-day="${d}" aria-label="ნომერი ${r.id}, ${J.fmt(d)}, თავისუფალი"></button></td>`;i++}
+   else{const g=inGap(r.id,d);h+=`<td><button class="cell${g?' gap':''}" data-room="${r.id}" data-day="${d}" aria-label="ნომერი ${r.id}, ${J.fmt(d)}, ${g?'მოკლე ფანჯარა':'თავისუფალი'}"${g?' title="მოკლე ფანჯარა: ჩატბოტი სთავაზობს"':''}></button></td>`;i++}
   }
   h+='</tr>';
  }
@@ -259,7 +269,7 @@ $('aSave').addEventListener('click',e=>{
 /* --- booking info dialog --- */
 let infoId=null;
 function openInfo(id){const b=J.bookings.find(x=>x.id===id);if(!b)return;infoId=id;
- $('infoBody').innerHTML=`<h1 style="font-size:19px">${esc(b.name)}</h1><p class="sub" style="margin:0">${esc(b.phone||'')}</p><p style="margin:8px 0 0">ნომერი ${b.room} · ${esc(typeName(b.type))}<br>${J.fmtRange(b.from,b.to)} · ${J.nights(b.from,b.to)} ღამე<br>${J.quote(b.type,b.from,b.to,b.guests)} ₾ · ${SRC[b.source]||b.source}</p>`;
+ $('infoBody').innerHTML=`<h1 style="font-size:19px">${esc(b.name)}</h1><p class="sub" style="margin:0">${esc(b.phone||'')}</p><p style="margin:8px 0 0">ნომერი ${b.room} · ${esc(typeName(b.type))}<br>${J.fmtRange(b.from,b.to)} · ${J.nights(b.from,b.to)} ღამე<br>${b.price??J.quote(b.type,b.from,b.to,b.guests)} ₾${b.note?' · '+esc(b.note):''} · ${SRC[b.source]||b.source}</p>`;
  $('info').showModal()}
 $('info').addEventListener('close',()=>{if($('info').returnValue==='del'&&infoId){J.remove(infoId);renderAll()}infoId=null});
 
@@ -285,13 +295,16 @@ $('resetBtn').onclick=()=>{J.reset();start=J.today();renderAll();flash('დე�
 /* --- site season --- */
 const MON=['იანვარი','თებერვალი','მარტი','აპრილი','მაისი','ივნისი','ივლისი','აგვისტო','სექტემბერი','ოქტომბერი','ნოემბერი','დეკემბერი'];
 const mdText=v=>{const [m,d]=v.split('-').map(Number);return d+' '+MON[m-1]};
+function renderGaps(){$('gDisc').value=J.gapDiscount();const d=J.gapDiscount(),list=J.gaps(60);
+ $('gapList').innerHTML=list.length?list.map(g=>`<li>${J.fmtRange(g.from,g.to)} · ${g.n} ღამე · ნომერი ${g.room} (${esc(typeName(g.type))})</li>`).join(''):'<li style="list-style:none;margin-left:-18px;color:var(--mute)">ახლო 60 დღეში მოკლე ფანჯარა არ არის.</li>'}
+$('gDisc').addEventListener('change',e=>{const v=Math.max(0,Math.min(50,parseInt(e.target.value)||0));J.setSetting('gapDiscount',String(v));renderGaps();flash('ფანჯრის ფასდაკლება: '+v+'%',true)});
 function renderSeason(){const st=J.settings;$('sMode').value=st.seasonMode;$('sFrom').value=st.winterFrom;$('sTo').value=st.winterTo;
  $('sFrom').disabled=$('sTo').disabled=st.seasonMode!=='auto';
  const now=J.siteSeason();$('sNow').textContent=(st.seasonMode==='auto'?`ზამთარი: ${mdText(st.winterFrom)} – ${mdText(st.winterTo)}. `:'')+`დღეს საიტი იხსნება: ${now==='winter'?'ზამთარი':'ზაფხული'}.`}
 $('sMode').addEventListener('change',e=>{J.setSetting('seasonMode',e.target.value);renderSeason()});
 ['sFrom','sTo'].forEach(id=>$(id).addEventListener('change',e=>{let v=e.target.value.trim().replace(/[./ ]/g,'-');const m=v.match(/^(\d{1,2})-(\d{1,2})$/);
  if(m&&+m[1]>=1&&+m[1]<=12&&+m[2]>=1&&+m[2]<=31){v=m[1].padStart(2,'0')+'-'+m[2].padStart(2,'0');J.setSetting(id==='sFrom'?'winterFrom':'winterTo',v)}renderSeason()}));
-function renderAll(){renderReqs();renderCal();renderPrices();renderSeason()}
+function renderAll(){renderReqs();renderCal();renderPrices();renderSeason();renderGaps()}
 J.onChange(()=>{if(!$('app').hidden)renderAll()});
 }
 </script>

@@ -47,7 +47,7 @@ window.JIJI = (() => {
   // ---------- storage ----------
   let state, mode = 'demo';
   // Which season the site opens in. 'auto' follows the winter date range (MM-DD, may wrap the year).
-  const DEFAULT_SETTINGS = { seasonMode: 'auto', winterFrom: '11-15', winterTo: '03-31' };
+  const DEFAULT_SETTINGS = { seasonMode: 'auto', winterFrom: '11-15', winterTo: '03-31', gapDiscount: '10' };
   // capacity of a type = its largest guest version
   function syncCap(k) {
     const t = state.types[k];
@@ -85,7 +85,7 @@ window.JIJI = (() => {
     try { state = JSON.parse(localStorage.getItem(KEY)); } catch (e) { state = null; }
     if (!state || !state.bookings) { state = seed(); save(); return; }
     for (const k in state.types) syncCap(k);
-    if (!state.settings) { state.settings = { ...DEFAULT_SETTINGS }; save(); }
+    state.settings = { ...DEFAULT_SETTINGS, ...(state.settings || {}) };
     // add room types introduced after this browser first saved its data
     let added = false;
     for (const k in state.types) if (!DEFAULT_TYPES[k]) { delete state.types[k]; added = true; }
@@ -155,6 +155,36 @@ window.JIJI = (() => {
     }
     return best;
   }
+  // ---------- short gaps (1–3 free nights between bookings) ----------
+  const GAP_MAX = 3;
+  const roomBookings = roomId => confirmed().filter(x => x.room === roomId).sort((a, b) => a.from < b.from ? -1 : 1);
+  // free runs of 1..GAP_MAX nights that sit between two bookings (or between today and a booking)
+  function gaps(horizon = 60) {
+    const t = today(), end = addDays(t, horizon), out = [];
+    for (const room of ROOMS) {
+      let prev = t;
+      for (const b of roomBookings(room.id)) {
+        if (b.to <= t) continue;
+        const from = prev > t ? prev : t, n = b.from > from ? nights(from, b.from) : 0;
+        if (n >= 1 && n <= GAP_MAX && from <= end) out.push({ room: room.id, type: room.type, from, to: b.from, n });
+        if (b.to > prev) prev = b.to;
+      }
+    }
+    return out.sort((a, b) => a.from < b.from ? -1 : a.from > b.from ? 1 : a.n - b.n);
+  }
+  const gapDiscount = () => Math.max(0, Math.min(50, parseInt(state.settings?.gapDiscount) || 0));
+  // the room that leaves the fewest short gaps around a stay
+  function bestRoom(type, from, to) {
+    const pen = g => g === null ? 2 : g === 0 ? 0 : g <= GAP_MAX ? 10 : 3;
+    let best = null, bestScore = Infinity;
+    for (const room of ROOMS.filter(r => r.type === type && roomFree(r.id, from, to))) {
+      const bs = roomBookings(room.id);
+      const before = bs.filter(x => x.to <= from).pop(), after = bs.find(x => x.from >= to);
+      const score = pen(before ? nights(before.to, from) : null) + pen(after ? nights(to, after.from) : null);
+      if (score < bestScore) { best = room.id; bestScore = score; }
+    }
+    return best;
+  }
   // Nearest start date within `days` days with the same length of stay.
   function nextOffer(from, n, guests, days = 30) {
     for (let i = 1; i <= days; i++) {
@@ -165,17 +195,17 @@ window.JIJI = (() => {
   }
 
   // ---------- actions ----------
-  function createRequest({ from, to, guests, name, phone, source, type }) {
+  function createRequest({ from, to, guests, name, phone, source, type, price, note }) {
     const offer = type ? { type } : findOffer(from, to, guests);
     const t = offer ? offer.type : (Object.keys(state.types).find(k => rateFor(k, guests)) || Object.keys(state.types)[0]);
-    const req = { id: uid(), room: null, type: t, from, to, guests, name, phone, status: 'pending', source, created: new Date().toISOString() };
+    const req = { id: uid(), room: null, type: t, from, to, guests, name, phone, status: 'pending', source, price: price ?? null, note: note || '', created: new Date().toISOString() };
     state.bookings.push(req); save();
-    req.saved = post('api/request', { from, to, guests, name, phone, source });
+    req.saved = post('api/request', { from, to, guests, name, phone, source, type: t, gap: !!note });
     return req;
   }
   function confirm(id, roomId) {
     const r = state.bookings.find(x => x.id === id); if (!r) return { ok: false, msg: 'ჯავშანი ვერ მოიძებნა' };
-    const room = roomId || freeRoomsOfType(r.type, r.from, r.to)[0];
+    const room = roomId || bestRoom(r.type, r.from, r.to);
     if (!room || !roomFree(room, r.from, r.to, r.id)) return { ok: false, msg: 'ამ თარიღებზე ' + state.types[r.type].name + ' ნომერი თავისუფალი აღარ არის' };
     r.room = room; r.status = 'confirmed'; save(); post('api/admin/action', { op: 'confirm', id, room }); return { ok: true, room };
   }
@@ -252,7 +282,7 @@ window.JIJI = (() => {
 
   return {
     ROOMS, SEASONS, get settings() { return state.settings; }, setSetting, siteSeason, get types() { return state.types; }, get bookings() { return state.bookings; },
-    today, addDays, nights, fmt, fmtRange, weekday, seasonOf, quote, rateFor, fromPrice, findOffer, nextOffer, partialOffer, splitOffer, roomFree,
+    today, addDays, nights, fmt, fmtRange, weekday, seasonOf, quote, rateFor, fromPrice, findOffer, nextOffer, partialOffer, splitOffer, gaps, gapDiscount, bestRoom, roomFree,
     createRequest, confirm, decline, addManual, setRate, addRate, removeRate, remove, reset, onChange, onError, reload: load,
     ready, get mode() { return mode; }
   };

@@ -13,7 +13,7 @@ export const DEFAULT_ROOMS = [
   ['103', 'family'], ['203', 'family'], ['201', 'budget'], ['202', 'budget'],
   ['204', 'duplex'], ['301', 'duplex'], ['302', 'lux'], ['303', 'lux'],
 ];
-export const DEFAULT_SETTINGS = { seasonMode: 'auto', winterFrom: '11-15', winterTo: '03-31' };
+export const DEFAULT_SETTINGS = { seasonMode: 'auto', winterFrom: '11-15', winterTo: '03-31', gapDiscount: '10' };
 
 // ---------- dates ----------
 const toD = s => { const [y, m, d] = s.split('-').map(Number); return new Date(Date.UTC(y, m - 1, d)); };
@@ -41,7 +41,7 @@ const SCHEMA = [
   `CREATE TABLE IF NOT EXISTS types (id TEXT PRIMARY KEY, name TEXT, rates TEXT, sort INTEGER)`,
   `CREATE TABLE IF NOT EXISTS rooms (id TEXT PRIMARY KEY, type TEXT)`,
   `CREATE TABLE IF NOT EXISTS bookings (id TEXT PRIMARY KEY, room TEXT, type TEXT, date_from TEXT, date_to TEXT,
-     guests INTEGER, name TEXT, phone TEXT, status TEXT, source TEXT, created TEXT)`,
+     guests INTEGER, name TEXT, phone TEXT, status TEXT, source TEXT, created TEXT, price INTEGER, note TEXT)`,
   `CREATE INDEX IF NOT EXISTS bookings_dates ON bookings (status, date_from, date_to)`,
   `CREATE TABLE IF NOT EXISTS convos (id TEXT PRIMARY KEY, state TEXT, updated TEXT)`,
 ];
@@ -58,11 +58,13 @@ export async function ensureDb(db) {
     Object.entries(DEFAULT_SETTINGS).forEach(([k, v]) => st.push(db.prepare('INSERT OR IGNORE INTO settings (k,v) VALUES (?,?)').bind(k, v)));
     await db.batch(st);
   }
+  // columns added after the first release
+  for (const col of ['price INTEGER', 'note TEXT']) { try { await db.prepare('ALTER TABLE bookings ADD COLUMN ' + col).run(); } catch (e) { /* exists */ } }
   ready = true;
 }
 
 const rowToBooking = r => ({ id: r.id, room: r.room, type: r.type, from: r.date_from, to: r.date_to, guests: r.guests,
-  name: r.name, phone: r.phone, status: r.status, source: r.source, created: r.created });
+  name: r.name, phone: r.phone, status: r.status, source: r.source, created: r.created, price: r.price, note: r.note });
 
 // Everything needed to answer availability questions. `full` adds guest details (admin only).
 export async function loadState(db, { full = false } = {}) {
@@ -144,6 +146,36 @@ export function splitOffer(st, from, to, guests) {
   }
   return best;
 }
+// ---------- short gaps (1–3 free nights between bookings) ----------
+export const GAP_MAX = 3;
+const roomBookings = (st, roomId) => st.bookings.filter(x => x.status === 'confirmed').filter(x => x.room === roomId).sort((a, b) => a.from < b.from ? -1 : 1);
+// free runs of 1..GAP_MAX nights that sit between two bookings (or between today and a booking)
+export function gaps(st, horizon = 60) {
+  const t = today(), end = addDays(t, horizon), out = [];
+  for (const room of st.rooms) {
+    let prev = t;
+    for (const b of roomBookings(st, room.id)) {
+      if (b.to <= t) continue;
+      const from = prev > t ? prev : t, n = b.from > from ? nights(from, b.from) : 0;
+      if (n >= 1 && n <= GAP_MAX && from <= end) out.push({ room: room.id, type: room.type, from, to: b.from, n });
+      if (b.to > prev) prev = b.to;
+    }
+  }
+  return out.sort((a, b) => a.from < b.from ? -1 : a.from > b.from ? 1 : a.n - b.n);
+}
+export const gapDiscount = st => Math.max(0, Math.min(50, parseInt(st.settings?.gapDiscount) || 0));
+// the room that leaves the fewest short gaps around a stay
+export function bestRoom(st, type, from, to) {
+  const pen = g => g === null ? 2 : g === 0 ? 0 : g <= GAP_MAX ? 10 : 3;
+  let best = null, bestScore = Infinity;
+  for (const room of st.rooms.filter(r => r.type === type && roomFree(st, r.id, from, to))) {
+    const bs = roomBookings(st, room.id);
+    const before = bs.filter(x => x.to <= from).pop(), after = bs.find(x => x.from >= to);
+    const score = pen(before ? nights(before.to, from) : null) + pen(after ? nights(to, after.from) : null);
+    if (score < bestScore) { best = room.id; bestScore = score; }
+  }
+  return best;
+}
 export function nextOffer(st, from, n, guests, days = 30) {
   for (let i = 1; i <= days; i++) {
     const f = addDays(from, i), o = findOffer(st, f, addDays(f, n), guests);
@@ -153,19 +185,26 @@ export function nextOffer(st, from, n, guests, days = 30) {
 }
 
 // ---------- writes ----------
-export async function createRequest(db, st, { from, to, guests, name, phone, source }) {
+export async function createRequest(db, st, { from, to, guests, name, phone, source, type: wanted, gap }) {
   if (!isDate(from) || !isDate(to) || to <= from || from < today()) throw new Error('bad dates');
   if (nights(from, to) > 30) throw new Error('too long');
   guests = Math.max(1, Math.min(12, parseInt(guests) || 1));
   name = String(name || '').trim().slice(0, 80);
   phone = String(phone || '').trim().slice(0, 30);
   if (!name || phone.replace(/\D/g, '').length < 9) throw new Error('name and phone required');
-  const offer = findOffer(st, from, to, guests);
+  // a gap offer (or a split part) asks for a specific type; otherwise the cheapest free one
+  const fits = wanted && st.types[wanted] && rateFor(st, wanted, guests) && freeRooms(st, wanted, from, to).length;
+  const offer = fits ? { type: wanted, total: quote(st, wanted, from, to, guests) } : findOffer(st, from, to, guests);
   const type = offer ? offer.type : (Object.keys(st.types).find(k => rateFor(st, k, guests)) || Object.keys(st.types)[0]);
-  const b = { id: uid(), room: null, type, from, to, guests, name, phone, status: 'pending', source: String(source || 'site').slice(0, 20), created: new Date().toISOString() };
-  await db.prepare('INSERT INTO bookings (id,room,type,date_from,date_to,guests,name,phone,status,source,created) VALUES (?,?,?,?,?,?,?,?,?,?,?)')
-    .bind(b.id, null, b.type, b.from, b.to, b.guests, b.name, b.phone, b.status, b.source, b.created).run();
-  return { booking: b, total: offer ? offer.total : quote(st, type, from, to, guests), typeName: st.types[type]?.name };
+  // only a stay that exactly fills a short gap gets the gap discount
+  const isGap = !!gap && gaps(st).some(g => g.type === type && g.from === from && g.to === to);
+  const full = offer ? offer.total : quote(st, type, from, to, guests);
+  const price = isGap ? Math.round(full * (100 - gapDiscount(st)) / 100) : full;
+  const note = isGap && gapDiscount(st) ? `ფანჯარა −${gapDiscount(st)}%` : '';
+  const b = { id: uid(), room: null, type, from, to, guests, name, phone, status: 'pending', source: String(source || 'site').slice(0, 20), created: new Date().toISOString(), price, note };
+  await db.prepare('INSERT INTO bookings (id,room,type,date_from,date_to,guests,name,phone,status,source,created,price,note) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)')
+    .bind(b.id, null, b.type, b.from, b.to, b.guests, b.name, b.phone, b.status, b.source, b.created, b.price, b.note).run();
+  return { booking: b, total: price, typeName: st.types[type]?.name };
 }
 
 export const json = (data, status = 200) => new Response(JSON.stringify(data), {

@@ -76,6 +76,7 @@
     bot('რით დაგეხმაროთ?');
     options([
       { t: 'თავისუფალი ნომრები და ფასი', f: askDate },
+      ...(J.gaps().length ? [{ t: 'მოკლე შეთავაზებები (1–3 ღამე)', f: deals }] : []),
       { t: 'სად ვართ', f: location },
       { t: 'ხშირი კითხვები', f: faq },
       { t: 'ვილა ჯიჯისთან დაკავშირება', f: contact }
@@ -139,6 +140,8 @@
   }
   function check(g) {
     ctx.g = g; ctx.to = J.addDays(ctx.from, ctx.n);
+    const hit = J.gaps().find(x => x.from === ctx.from && x.to === ctx.to && J.rateFor(x.type, g));
+    if (hit && J.gapDiscount()) { ctx.gap = hit; gapGuests(g); return; }
     const o = J.findOffer(ctx.from, ctx.to, g);
     if (o) {
       ctx.offer = o;
@@ -176,6 +179,33 @@ ${J.fmtRange(nx.from, nx.to)} · ${esc(nx.name)}<strong>${nx.total} ₾</strong>
     }
     options([...opts, { t: 'სხვა თარიღი', f: askDate, sub: true }, { t: 'დაკავშირება', f: contact, sub: true }]);
   }
+  // ---------- short free windows between bookings, with the gap discount ----------
+  const maxGuests = type => Math.max(0, ...(J.types[type]?.rates || []).map(r => r.guests));
+  const gapPrice = (g, guests) => Math.round(J.quote(g.type, g.from, g.to, guests) * (100 - J.gapDiscount()) / 100);
+  function uniqGaps() {
+    const seen = new Set();
+    return J.gaps().filter(g => { const k = g.type + g.from + g.to; if (seen.has(k)) return false; seen.add(k); return true; }).slice(0, 6);
+  }
+  function deals() {
+    const list = uniqGaps(), d = J.gapDiscount();
+    if (!list.length) { bot('ამჟამად მოკლე შეთავაზება არ გვაქვს. ნახეთ თავისუფალი თარიღები კალენდარში.'); options([{ t: 'თავისუფალი ნომრები', f: askDate }, ...nav()]); return; }
+    bot(`ორ ჯავშანს შორის დარჩენილი 1–3 ღამე${d ? `, <b>${d}% ფასდაკლებით</b>` : ''}:`);
+    list.forEach(g => bot(`<b>${J.fmtRange(g.from, g.to)} · ${g.n} ღამე</b>\n${esc(J.types[g.type].name)} · ${maxGuests(g.type)} სტუმრამდე<strong>${gapPrice(g, 2)} ₾-დან</strong>საუზმით · სანიმუშო ფასი`, 'offer'));
+    options([...list.map(g => ({ t: `${J.fmtRange(g.from, g.to)} · ${J.types[g.type].name}`, f: () => pickGap(g) })), ...nav()]);
+  }
+  function pickGap(g) {
+    ctx.gap = g; ctx.from = g.from; ctx.to = g.to; ctx.n = g.n;
+    bot('რამდენი სტუმარი?');
+    const cap = maxGuests(g.type);
+    options([...Array.from({ length: Math.min(cap, 6) }, (_, i) => i + 1).map(n => ({ t: String(n), f: () => gapGuests(n) })), ...nav()]);
+  }
+  function gapGuests(n) {
+    const g = ctx.gap; ctx.g = n;
+    const total = gapPrice(g, n), name = J.types[g.type].name;
+    ctx.offer = { type: g.type, name, total, note: J.gapDiscount() ? `ფანჯარა −${J.gapDiscount()}%` : 'ფანჯარა' };
+    bot(`${J.fmtRange(g.from, g.to)} · ${g.n} ღამე · ${n} სტუმარი\n${esc(name)}<strong>${total} ₾</strong>${J.gapDiscount() ? `ჩვეულებრივ ${J.quote(g.type, g.from, g.to, n)} ₾ · ` : ''}საუზმით`, 'offer');
+    options([{ t: 'დაჯავშნა', f: askName }, { t: 'სხვა შეთავაზება', f: deals }, ...nav()]);
+  }
   function group() {
     bot('7 და მეტი სტუმრისთვის რამდენიმე ნომერს გავაერთიანებთ. ამას ვილა ჯიჯი პირადად შეგითანხმებთ.');
     contact(true);
@@ -184,9 +214,10 @@ ${J.fmtRange(nx.from, nx.to)} · ${esc(nx.name)}<strong>${nx.total} ₾</strong>
   function askPhone() { bot('ტელეფონის ნომერი, რომ დაგიკავშირდეთ?'); mode = 'phone'; setInput('tel', '+995 5…'); options(nav()); }
   function finish() {
     const parts = ctx.split || [{ from: ctx.from, to: ctx.to, type: ctx.offer.type }];
-    parts.forEach(p => J.createRequest({ from: p.from, to: p.to, guests: ctx.g, name: ctx.name, phone: ctx.phone, source: 'chat', type: p.type }));
+    const gapNote = !ctx.split && ctx.offer.note;
+    parts.forEach(p => J.createRequest({ from: p.from, to: p.to, guests: ctx.g, name: ctx.name, phone: ctx.phone, source: 'chat', type: p.type, ...(gapNote ? { price: ctx.offer.total, note: ctx.offer.note } : {}) }));
     const r = { from: parts[0].from, to: parts[parts.length - 1].to };
-    delete ctx.split;
+    delete ctx.split; delete ctx.gap;
     mode = 'menu'; setInput(null);
     bot(`მოთხოვნა მიღებულია.\n${J.fmtRange(r.from, r.to)} · ${esc(ctx.offer.name)} · ${ctx.offer.total} ₾\n\nვილა ჯიჯი დაგიკავშირდებათ ნომერზე ${esc(ctx.phone)} ჯავშნის დასადასტურებლად. გადახდა საჭირო არ არის.`);
     options(nav());

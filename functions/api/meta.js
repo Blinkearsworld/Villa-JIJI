@@ -1,7 +1,7 @@
 // /api/meta — Facebook Messenger and Instagram Direct webhook.
 // Same scripted flow as the site chatbot (no AI), answering from the same database.
 // Env (set as secrets in Cloudflare): META_VERIFY_TOKEN, META_APP_SECRET, META_PAGE_TOKEN; optional META_GRAPH_VERSION.
-import { loadState, findOffer, nextOffer, partialOffer, splitOffer, createRequest, addDays, today, fmt, fmtRange, json } from '../_lib/core.js';
+import { loadState, findOffer, nextOffer, partialOffer, splitOffer, gaps, gapDiscount, quote, rateFor, createRequest, addDays, today, fmt, fmtRange, json } from '../_lib/core.js';
 
 const PHONE = '+995 596 90 40 60';
 const MAP = 'https://maps.google.com/?q=41.7318533,43.5301119';
@@ -58,7 +58,7 @@ async function send(env, psid, text, replies) {
   }); } catch (e) { console.log('send failed', e.message); return; }
   if (!res.ok) console.log('send failed', res.status, await res.text());
 }
-const MENU = [['ნომრები და ფასი', 'AVAIL'], ['სად ვართ', 'LOC'], ['ხშირი კითხვები', 'FAQ'], ['დაკავშირება', 'CONTACT']];
+const MENU = [['ნომრები და ფასი', 'AVAIL'], ['მოკლე შეთავაზებები', 'DEALS'], ['სად ვართ', 'LOC'], ['ხშირი კითხვები', 'FAQ'], ['დაკავშირება', 'CONTACT']];
 const BACK = ['მენიუ', 'MENU'];
 
 // ---------- conversation state ----------
@@ -115,9 +115,29 @@ async function handle(env, channel, ev) {
     c.step = 'menu'; c.handoff = Date.now() + HANDOFF_MS;
     await say((lead || 'ვილა ჯიჯის ადმინისტრაცია აქვე გიპასუხებთ.') + `\nან დაგვირეკეთ: ${PHONE} (ყოველდღე 10:00–20:00)`, [BACK]);
   };
+  // short free windows (1–3 nights) between bookings, offered with the gap discount
+  const maxG = (st, t) => Math.max(0, ...(st.types[t]?.rates || []).map(r => r.guests));
+  const gapPrice = (st, g, n) => Math.round(quote(st, g.type, g.from, g.to, n) * (100 - gapDiscount(st)) / 100);
+  const deals = async () => {
+    const st = await loadState(db), d = gapDiscount(st), seen = new Set();
+    const list = gaps(st).filter(g => { const k = g.type + g.from + g.to; if (seen.has(k)) return false; seen.add(k); return true; }).slice(0, 6);
+    c.step = 'menu';
+    if (!list.length) return say('ამჟამად მოკლე შეთავაზება არ გვაქვს.', [['ნომრები და ფასი', 'AVAIL'], BACK]);
+    c.gaps = list.map(g => ({ type: g.type, from: g.from, to: g.to, n: g.n }));
+    const lines = list.map((g, i) => `${i + 1}) ${fmtRange(g.from, g.to)} · ${g.n} ღამე\n${st.types[g.type].name}, ${maxG(st, g.type)} სტუმრამდე · ${gapPrice(st, g, 1)} ₾-დან`);
+    return say(`ორ ჯავშანს შორის დარჩენილი 1–3 ღამე${d ? `, ${d}% ფასდაკლებით` : ''}:\n\n` + lines.join('\n\n'), list.map((g, i) => [`${i + 1}) ${fmt(g.from)}`, 'GAP_' + i]).concat([BACK]));
+  };
+  const gapOffer = async (st, g, n) => {
+    const total = gapPrice(st, g, n), name = st.types[g.type].name, d = gapDiscount(st);
+    c.g = n; c.step = 'offer';
+    c.pick = { parts: [{ from: g.from, to: g.to, type: g.type }], typeName: name, total, gap: true };
+    return say(`${fmtRange(g.from, g.to)} · ${g.n} ღამე · ${n} სტუმარი\n${name}\n${total} ₾, საუზმით${d ? ` (ჩვეულებრივ ${quote(st, g.type, g.from, g.to, n)} ₾)` : ''}`, [['დაჯავშნა', 'GBOOK'], ['სხვა შეთავაზება', 'DEALS'], BACK]);
+  };
   const check = async () => {
     const st = await loadState(db);
     c.to = addDays(c.from, c.n);
+    const hit = gapDiscount(st) && gaps(st).find(x => x.from === c.from && x.to === c.to && rateFor(st, x.type, c.g));
+    if (hit) return gapOffer(st, hit, c.g);
     const o = findOffer(st, c.from, c.to, c.g);
     if (o) { c.step = 'offer'; c.type = o.type; c.total = o.total; c.typeName = o.name; return say(offerText(c.from, c.to, o), [['დაჯავშნა', 'BOOK'], ['სხვა თარიღი', 'AVAIL'], BACK]); }
     const part = partialOffer(st, c.from, c.to, c.g), split = splitOffer(st, c.from, c.to, c.g), nx = nextOffer(st, c.from, c.n, c.g);
@@ -130,7 +150,7 @@ async function handle(env, channel, ev) {
     if (split) {
       const [x, y] = split.parts;
       lines.push(`\n1) მთელი ${c.n} ღამე, ნომრის ერთი გამოცვლით:\n${fmtRange(x.from, x.to)} · ${x.name}\n${fmtRange(y.from, y.to)} · ${y.name}\n${split.total} ₾, საუზმით`);
-      c.alts.SPLIT = { parts: split.parts.map(p => ({ from: p.from, to: p.to })), typeName: x.name + ' → ' + y.name, total: split.total };
+      c.alts.SPLIT = { parts: split.parts.map(p => ({ from: p.from, to: p.to, type: p.type })), typeName: x.name + ' → ' + y.name, total: split.total };
       btns.push([`მთელი ${c.n} ღამე`, 'PICK_SPLIT']);
     }
     if (part) {
@@ -153,6 +173,14 @@ async function handle(env, channel, ev) {
     else if (payload === 'FAQ') { c.step = 'menu'; await say('აირჩიეთ კითხვა:', FAQ.map(([q], i) => [q, 'FAQ_' + i]).concat([BACK])); }
     else if (payload?.startsWith('FAQ_')) await say(FAQ[+payload.slice(4)]?.[1] || '—', [['სხვა კითხვა', 'FAQ'], ['ნომრები და ფასი', 'AVAIL'], BACK]);
     else if (payload === 'CONTACT') await contact();
+    else if (payload === 'DEALS') await deals();
+    else if (payload?.startsWith('GAP_') && c.gaps?.[+payload.slice(4)]) {
+      const st = await loadState(db), g = c.gaps[+payload.slice(4)], cap = Math.min(6, maxG(st, g.type));
+      c.gap = g; c.step = 'gapguests';
+      await say('რამდენი სტუმარი?', Array.from({ length: cap }, (_, i) => [String(i + 1), 'GG_' + (i + 1)]).concat([BACK]));
+    }
+    else if (payload?.startsWith('GG_') && c.gap) await gapOffer(await loadState(db), c.gap, +payload.slice(3));
+    else if (payload === 'GBOOK' && c.pick) { c.step = 'name'; await say('თქვენი სახელი?'); }
     else if (payload?.startsWith('D_') || c.step === 'date') {
       const d = payload?.startsWith('D_') ? payload.slice(2) : parseDate(text);
       if (!d || d < today()) await say('თარიღი ვერ გავიგე. დაწერეთ ასე: 15.01', [BACK]);
@@ -169,15 +197,17 @@ async function handle(env, channel, ev) {
       else await check();
     }
     else if (payload?.startsWith('PICK_') && c.alts?.[payload.slice(5)]) { c.pick = c.alts[payload.slice(5)]; delete c.alts; c.step = 'name'; await say('თქვენი სახელი?'); }
-    else if (payload === 'BOOK') { c.pick = { parts: [{ from: c.from, to: c.to }], typeName: c.typeName, total: c.total }; c.step = 'name'; await say('თქვენი სახელი?'); }
+    else if (payload === 'BOOK') { c.pick = { parts: [{ from: c.from, to: c.to, type: c.type }], typeName: c.typeName, total: c.total }; c.step = 'name'; await say('თქვენი სახელი?'); }
     else if (c.step === 'name' && text) { c.name = text.slice(0, 80); c.step = 'phone'; await say('ტელეფონის ნომერი, რომ დაგიკავშირდეთ?'); }
     else if (c.step === 'phone' && text) {
       if (text.replace(/\D/g, '').length < 9) await say('ნომერი მოკლეა, გთხოვთ სრულად ჩაწეროთ.');
       else {
         const st = await loadState(db), pick = c.pick || { parts: [{ from: c.from, to: c.to }], typeName: c.typeName, total: c.total };
-        for (const p of pick.parts) await createRequest(db, st, { from: p.from, to: p.to, guests: c.g, name: c.name, phone: text, source: channel === 'ig' ? 'instagram' : 'facebook' });
+        let total = 0;
+        for (const p of pick.parts) total += (await createRequest(db, st, { from: p.from, to: p.to, guests: c.g, name: c.name, phone: text, source: channel === 'ig' ? 'instagram' : 'facebook', type: p.type || c.type, gap: !!pick.gap })).total;
+        if (pick.gap) pick.total = total;
         const first = pick.parts[0].from, last = pick.parts[pick.parts.length - 1].to;
-        c.step = 'menu'; delete c.pick;
+        c.step = 'menu'; delete c.pick; delete c.gap; delete c.gaps;
         await say(`მოთხოვნა მიღებულია.\n${fmtRange(first, last)} · ${pick.typeName} · ${pick.total} ₾\n\nვილა ჯიჯი დაგიკავშირდებათ ნომერზე ${text} ჯავშნის დასადასტურებლად. გადახდა საჭირო არ არის.`, [BACK]);
       }
     }
