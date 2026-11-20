@@ -332,7 +332,7 @@ $('reqs').addEventListener('click',e=>{
 });
 function flash(t,good){$('flash').innerHTML=`<p class="msg ${good?'good':''}">${esc(t)}</p>`;clearTimeout(flash.t);flash.t=setTimeout(()=>$('flash').innerHTML='',6000)}
 
-/* --- calendar: 10 rooms x 14 days --- */
+/* --- calendar: rooms x 14 days --- */
 let start=J.today();const DAYS=14;
 function renderCal(){
  const days=Array.from({length:DAYS},(_,i)=>J.addDays(start,i)),end=J.addDays(start,DAYS),t=J.today();

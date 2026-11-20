@@ -15,7 +15,7 @@ window.JIJI = (() => {
     duplex: { name: 'დუპლექსი', rates: [R(2, 220, 300, 380, 500), R(3, 250, 340, 430, 560), R(4, 290, 390, 480, 620)] },
     lux:    { name: 'ლუქსი', rates: [R(2, 210, 290, 370, 480), R(3, 245, 335, 415, 540), R(4, 280, 380, 460, 600)] },
   };
-  // 10 rooms. The split between types is a SAMPLE, the owner sets the real one.
+  // 8 rooms: 2 lux, 2 duplex, 2 family, 2 budget.
   const ROOMS = [
     { id: '103', type: 'family' },
     { id: '201', type: 'budget' }, { id: '202', type: 'budget' }, { id: '203', type: 'family' },
