@@ -121,6 +121,9 @@ p{margin:0}
 .vplay:hover span{transform:scale(1.05)}
 .vbox .len{position:absolute;right:14px;bottom:12px;font-size:13px;color:#fff;background:rgba(0,0,0,.55);padding:3px 10px;border-radius:999px;pointer-events:none}
 .ny .small{margin-top:14px}
+.sgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.sgrid img{width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:10px}
+@media(max-width:860px){.ny .sgrid{order:-1}}
 @media(max-width:860px){.ny .wrap{grid-template-columns:minmax(0,1fr)}.ny .vbox{order:-1}}
 /* spaces, territory, nearby */
 .sec{padding:clamp(80px,10vw,140px) 0}
@@ -228,6 +231,7 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 <a href="#seasons">სეზონები</a>
 <a href="#fire">ბუხრის ოთახი</a>
 <a class="only-w" href="#newyear">ახალი წელი</a>
+<a class="only-s" href="#summer">ზაფხული</a>
 <a href="#spaces">სივრცეები</a>
 <a href="#grounds">ეზო</a>
 <a href="#near">ახლოს</a>
@@ -279,16 +283,16 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 
 <section id="seasons" aria-label="ორი სეზონი">
 <div class="seasons">
-<button class="pane on" type="button" aria-expanded="true">
+<button class="pane on only-w" type="button" aria-expanded="true">
 <img src="img/winter/night-snow-1.jpg" alt="" loading="lazy">
 <span class="txt"><h3>ზამთარი</h3><p>საბაგირო ახლოსაა, სკი-პასს ადგილზე იყიდით. ტრასიდან დაბრუნებულს ბუხარი და ცხელი ჩაი გელით.</p></span>
 </button>
-<button class="pane" type="button" aria-expanded="false">
-<img src="img/pool-tall.jpg" alt="" loading="lazy">
+<button class="pane only-s" type="button" aria-expanded="false">
+<img src="img/summer/pool-kids.jpg" alt="" loading="lazy">
 <span class="txt"><h3>ზაფხული</h3><p>აუზი მზიან ეზოში, გაზონი, საქანელა და მაყალი. ტყის ბილიკები ახლოსაა, ბორჯომი 18 კმ-ში.</p></span>
 </button>
 </div>
-<p class="hint">აირჩიეთ სეზონი</p>
+
 </section>
 
 <section class="ny only-w" id="newyear" aria-label="ახალი წელი ვილა ჯიჯიში">
@@ -309,10 +313,25 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 </div>
 </section>
 
+<section class="ny only-s" id="summer" aria-label="ზაფხული ვილა ჯიჯიში">
+<div class="wrap">
+<div>
+<h2>ზაფხული ბავშვებისთვის</h2>
+<p class="lead">ზაფხულში ეზო ბავშვების სამეფოა: აუზი, ბატუტი, საქანელები და საპნის ბუშტების წვეულებები. დიდები ფანჩატურში ისვენებენ, საღამოს კი მაყალი ინთება.</p>
+<div class="chips"><span>აუზი</span><span>ბატუტი</span><span>ბავშვთა წვეულებები</span><span>მაყალი</span></div>
+<div class="act"><button class="btn lamp" type="button" data-chat>ზაფხულის თარიღები</button></div>
+</div>
+<div class="sgrid">
+<img src="img/summer/pool-kids.jpg" alt="ბავშვები აუზში იცინიან და წყალს აშხეფებენ" loading="lazy">
+<img src="img/summer/bubbles.jpg" alt="ბავშვები საპნის ბუშტებში, ეზოს წვეულება" loading="lazy">
+</div>
+</div>
+</section>
+
 <section class="fire" id="fire" aria-label="ბუხრის ოთახი">
 <div class="wrap">
 <div>
-<h2>როცა ტრასიდან ბრუნდებით</h2>
+<h2 data-w="როცა ტრასიდან ბრუნდებით" data-s="საღამო ბუხართან">როცა ტრასიდან ბრუნდებით</h2>
 <p>ტყავის სავარძლები, ღვინის თაროები და ცოცხალი ცეცხლი. აქ სტუმრები ერთმანეთს ეცნობიან, ჭადრაკს თამაშობენ და ჩაის სვამენ, მეზობელ ოთახში კი ბილიარდი და კინო გელით.</p>
 <div class="chips"><span>ცოცხალი ცეცხლი</span><span>ღვინის თაროები</span><span>ტყავის სავარძლები</span><span>ჭადრაკი</span></div>
 </div>
@@ -332,6 +351,9 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 <figure class="only-w"><img src="img/winter/wine-terrace.jpg" alt="ღვინო ტერასაზე, განათებული ფასადი და თოვლი" loading="lazy"><figcaption>ღვინო ტერასაზე</figcaption></figure>
 <figure class="only-w"><img src="img/winter/fireworks.jpg" alt="ფეიერვერკი ვილა ჯიჯის თავზე" loading="lazy"><figcaption>ფეიერვერკი</figcaption></figure>
 <figure class="only-w"><img src="img/winter/hall.jpg" alt="მორთული დარბაზი ნაძვის ხით და ბუხრით" loading="lazy"><figcaption>დარბაზი</figcaption></figure>
+<figure class="only-s"><img src="img/summer/mug-facade.jpg" alt="ყავა ტერასაზე, ფასადი და ყვავილები" loading="lazy"><figcaption>დილის ყავა</figcaption></figure>
+<figure class="only-s"><img src="img/summer/family-lawn.jpg" alt="ოჯახი გაზონზე ვილა ჯიჯის წინ" loading="lazy"><figcaption>გაზონი</figcaption></figure>
+<figure class="only-s"><img src="img/summer/pergola.jpg" alt="ფანჩატური საქანელით, ბავშვები ეზოში" loading="lazy"><figcaption>ფანჩატური</figcaption></figure>
 </div>
 </section>
 
@@ -355,13 +377,18 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 <div>
 <h2>ეზო</h2>
 <p class="lead" data-w="ზამთარში ეზოს თოვლი ფარავს: ბავშვები თოვლის კაცს აკეთებენ, საღამოს კი კოცონს ვანთებთ და ახალ წელს ფეიერვერკით ვხვდებით." data-s="ხის ღობით შემოსაზღვრული საკუთარი ეზო ტყიანი მთის ხედით. ბავშვები უსაფრთხოდ თამაშობენ, დიდები ქოლგის ქვეშ ან შეზლონგზე ისვენებენ.">ხის ღობით შემოსაზღვრული საკუთარი ეზო ტყიანი მთის ხედით. ბავშვები უსაფრთხოდ თამაშობენ, დიდები ქოლგის ქვეშ ან შეზლონგზე ისვენებენ.</p>
-<ul class="ticks">
+<ul class="ticks only-s">
 <li>მწვანე გაზონი, თუჯის სკამები და ხის შეზლონგები</li>
 <li>საბავშვო მოედანი: სასრიალო, საქანელები და ბატუტი</li>
 <li>ქვით მოპირკეთებული ტერასა აუზით და შეზლონგებით</li>
-<li>მაგიდები ქოლგის ქვეშ და გადახურული ფანჩატური</li>
-<li>საღამოს ფარნები და გირლიანდა, ზამთარში თოვლის ეზო</li>
+<li>ფანჩატური საქანელით და მაგიდები ქოლგის ქვეშ</li>
 <li>მაყალი და უფასო პარკინგი</li>
+</ul>
+<ul class="ticks only-w">
+<li>თოვლიანი ეზო: თოვლის კაცი, ციგა და გუნდაობა</li>
+<li>კოცონი ეზოში და ცხელი ღვინო ტერასაზე</li>
+<li>ფარნები და გირლიანდა სახლზე ყოველ საღამოს</li>
+<li>გაწმენდილი ბილიკები და უფასო პარკინგი</li>
 </ul>
 </div>
 </div>
@@ -379,7 +406,7 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 <div class="wrap">
 <h2>რა არის ახლოს</h2>
 <p class="lead">ვილა ჯიჯი თრიალეთის ქუჩაზე დგას. მაღაზიები და აფთიაქი ფეხით მისასვლელ მანძილზეა.</p>
-<div class="near"><div class="nr"><h3>საბაგირო კოხტაზე</h3><p>გონდოლა მთის ფერდობზე, ზამთარში სათხილამუროდ</p><span class="d">300 მ</span></div><div class="nr"><h3>ბაკურიანის გასართობი პარკი</h3><p>საბავშვო მოედნები, კაფეები, ზამთარში სასრიალო</p><span class="d">1,8 კმ</span></div><div class="nr"><h3>რკინიგზის სადგური</h3><p>ვიწროლიანდაგიანი "კუკუშკა" ბორჯომისკენ</p><span class="d">2,6 კმ</span></div><div class="nr"><h3>დიდველის საბაგირო</h3><p>ბაკურიანის მთავარი სათხილამურო ზონა, ზაფხულში ტობოგანი</p><span class="d">2,9 კმ</span></div><div class="nr"><h3>ალპური ბოტანიკური ბაღი</h3><p>ფიჭვისა და ნაძვის ტყე, ჩანჩქერი</p><span class="d">2,9 კმ</span></div><div class="nr"><h3>კოხტა-მითარბი</h3><p>გრძელი ტრასები გამოცდილი მოთხილამურეებისთვის</p><span class="d">3,7 კმ</span></div><div class="nr"><h3>ბორჯომი</h3><p>მინერალური წყლების ცენტრალური პარკი</p><span class="d">18 კმ</span></div></div>
+<div class="near"><div class="nr"><h3>საბაგირო კოხტაზე</h3><p data-w="გონდოლა და სათხილამურო ფერდობი" data-s="გონდოლა ხედით მთელ ბაკურიანზე">გონდოლა მთის ფერდობზე, ზამთარში სათხილამუროდ</p><span class="d">300 მ</span></div><div class="nr"><h3>ბაკურიანის გასართობი პარკი</h3><p data-w="სასრიალო, ციგები და კაფეები" data-s="საბავშვო მოედნები, ატრაქციონები, კაფეები">საბავშვო მოედნები, კაფეები, ზამთარში სასრიალო</p><span class="d">1,8 კმ</span></div><div class="nr"><h3>რკინიგზის სადგური</h3><p>ვიწროლიანდაგიანი "კუკუშკა" ბორჯომისკენ</p><span class="d">2,6 კმ</span></div><div class="nr"><h3>დიდველის საბაგირო</h3><p data-w="ბაკურიანის მთავარი სათხილამურო ზონა" data-s="საბაგირო, ტობოგანი და პანორამა">ბაკურიანის მთავარი სათხილამურო ზონა, ზაფხულში ტობოგანი</p><span class="d">2,9 კმ</span></div><div class="nr"><h3>ალპური ბოტანიკური ბაღი</h3><p data-w="თოვლიანი ფიჭვის ტყე" data-s="ფიჭვისა და ნაძვის ტყე, ჩანჩქერი">ფიჭვისა და ნაძვის ტყე, ჩანჩქერი</p><span class="d">2,9 კმ</span></div><div class="nr"><h3>კოხტა-მითარბი</h3><p data-w="გრძელი ტრასები გამოცდილი მოთხილამურეებისთვის" data-s="ღია საბაგიროები და ხედები მთიდან">გრძელი ტრასები გამოცდილი მოთხილამურეებისთვის</p><span class="d">3,7 კმ</span></div><div class="nr"><h3>ბორჯომი</h3><p>მინერალური წყლების ცენტრალური პარკი</p><span class="d">18 კმ</span></div></div>
 <p class="small">მანძილი ვილა ჯიჯიდან პირდაპირ ხაზზეა დათვლილი, გზით ცოტა მეტი იქნება.</p>
 </div>
 </section>
@@ -498,6 +525,7 @@ form.addEventListener('submit',e=>{e.preventDefault();const a=inEl.value,b=outEl
 
 const nyBox=document.getElementById('nyBox');
 document.getElementById('nyPlay').addEventListener('click',()=>{nyBox.innerHTML='<video src="video/new-year.mp4" poster="video/new-year-poster.jpg" controls playsinline preload="auto"></video>';const v=nyBox.querySelector('video');v.play().catch(()=>{})});
+document.getElementById('summer').addEventListener('click',e=>{if(e.target.closest('[data-chat]'))window.JIJIChat?.open()});
 document.getElementById('newyear').addEventListener('click',e=>{if(e.target.closest('[data-chat]'))window.JIJIChat?.open()});
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const cv=document.getElementById('snow'),cx=cv.getContext('2d');
