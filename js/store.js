@@ -30,9 +30,15 @@ window.JIJI = (() => {
   const addDays = (s, n) => { const d = toD(s); d.setUTCDate(d.getUTCDate() + n); return toS(d); };
   const nights = (a, b) => Math.round((toD(b) - toD(a)) / 864e5);
   const today = () => { const n = new Date(); return toS(new Date(Date.UTC(n.getFullYear(), n.getMonth(), n.getDate()))); };
-  const MONTHS = ['იან', 'თებ', 'მარ', 'აპრ', 'მაი', 'ივნ', 'ივლ', 'აგვ', 'სექ', 'ოქტ', 'ნოე', 'დეკ'];
+  // short month names; the public site may switch them to English or Russian (js/i18n.js)
+  const MONTHS_BY = {
+    ka: ['იან', 'თებ', 'მარ', 'აპრ', 'მაი', 'ივნ', 'ივლ', 'აგვ', 'სექ', 'ოქტ', 'ნოე', 'დეკ'],
+    en: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+    ru: ['янв', 'фев', 'мар', 'апр', 'мая', 'июн', 'июл', 'авг', 'сен', 'окт', 'ноя', 'дек']
+  };
+  const lng = () => (window.I18N && MONTHS_BY[window.I18N.lang]) ? window.I18N.lang : 'ka';
   const WD = ['კვ', 'ორ', 'სმ', 'ოთ', 'ხთ', 'პრ', 'შბ'];
-  const fmt = s => { const d = toD(s); return d.getUTCDate() + ' ' + MONTHS[d.getUTCMonth()]; };
+  const fmt = s => { const d = toD(s); return d.getUTCDate() + ' ' + MONTHS_BY[lng()][d.getUTCMonth()]; };
   const fmtRange = (a, b) => fmt(a) + ' – ' + fmt(b);
   const weekday = s => WD[toD(s).getUTCDay()];
 
