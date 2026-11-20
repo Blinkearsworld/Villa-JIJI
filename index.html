@@ -70,6 +70,11 @@ p{margin:0}
 .tag{font:300 clamp(19px,1.8vw,26px)/1.35 "Noto Serif Georgian",serif;margin-top:12px;max-width:520px}
 .eyebrow{font-size:13px;letter-spacing:.06em;color:#dfe6ef;margin-bottom:14px}
 [data-season=summer] .hero img{object-position:50% 62%}
+[data-season=winter] .hero img{object-position:50% 30%}
+@media(min-width:861px){
+[data-season=winter] .hero::before{content:"";position:absolute;inset:-40px;background:url(img/winter/cover-portrait.jpg) center/cover;filter:blur(28px) brightness(.45) saturate(1.2)}
+[data-season=winter] .hero img{left:auto;right:0;width:min(62%,calc(100% - 520px));min-width:46%;object-fit:cover;object-position:50% 45%;-webkit-mask-image:linear-gradient(90deg,transparent 0,#000 18%);mask-image:linear-gradient(90deg,transparent 0,#000 18%)}
+}
 .hero .acts{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
 body.at-hero .jc-fab{opacity:0;pointer-events:none;transform:translateY(12px)}
 .jc-fab{transition:opacity .3s,transform .3s}
@@ -254,7 +259,7 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 
 <main>
 <section class="hero" id="hero" aria-label="Villa JIJI">
-<img class="swap" src="img/winter-night.jpg" alt="Villa JIJI თოვლიან ღამეს, ანთებული გირლიანდით" data-w="img/winter-night.jpg|ვილა ჯიჯი თოვლიან ღამეს, ანთებული გირლიანდით" data-s="img/pool-tall.jpg|ვილა ჯიჯი და აუზი ზაფხულში">
+<img class="swap" src="img/winter/cover-portrait.jpg" alt="Villa JIJI თოვლიან ღამეს, ანთებული გირლიანდით" data-w="img/winter/cover-portrait.jpg|ვილა ჯიჯი თოვლიან ღამეს, ანთებული გირლიანდით და საქანელით" data-s="img/pool-tall.jpg|ვილა ჯიჯი და აუზი ზაფხულში">
 <canvas id="snow" aria-hidden="true"></canvas>
 <div class="cap">
 <div class="wrap">
