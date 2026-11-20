@@ -43,7 +43,7 @@ p{margin:0}
 .swap.fade{opacity:0}
 [data-season=summer] .only-w{display:none}
 [data-season=winter] .only-s{display:none}
-@media(max-width:600px){[data-season=winter] .hero img{object-position:14% 40%}.logo svg{display:none}.sw button span{display:none}.sw button{padding:0;width:40px;justify-content:center}.top .wrap{gap:10px}.logo span{font-size:22px}.right{gap:8px}.right .btn.lamp{padding:0 14px;min-height:40px}.hero .acts .btn{flex:1 1 auto}}
+@media(max-width:600px){.logo svg{display:none}.sw button span{display:none}.sw button{padding:0;width:40px;justify-content:center}.top .wrap{gap:10px}.logo span{font-size:22px}.right{gap:8px}.right .btn.lamp{padding:0 14px;min-height:40px}.hero .acts .btn{flex:1 1 auto}}
 /* header */
 .top{position:fixed;inset:0 0 auto;z-index:20;transition:background .35s,backdrop-filter .35s}
 .top.solid{background:var(--bar);backdrop-filter:blur(12px)}
@@ -69,6 +69,7 @@ p{margin:0}
 .name{font:italic 500 clamp(56px,7.5vw,112px)/.9 Cormorant,serif;letter-spacing:-.01em}
 .tag{font:300 clamp(19px,1.8vw,26px)/1.35 "Noto Serif Georgian",serif;margin-top:12px;max-width:520px}
 .eyebrow{font-size:13px;letter-spacing:.06em;color:#dfe6ef;margin-bottom:14px}
+[data-season=summer] .hero img{object-position:50% 62%}
 .hero .acts{display:flex;flex-wrap:wrap;gap:12px;margin-top:26px}
 body.at-hero .jc-fab{opacity:0;pointer-events:none;transform:translateY(12px)}
 .jc-fab{transition:opacity .3s,transform .3s}
@@ -253,13 +254,12 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 
 <main>
 <section class="hero" id="hero" aria-label="Villa JIJI">
-<img class="swap" src="img/winter/lantern-facade.jpg" alt="Villa JIJI თოვლიან ღამეს, ანთებული გირლიანდით" data-w="img/winter/lantern-facade.jpg|ვილა ჯიჯი თოვლიან ღამეს, ფარნით და გირლიანდით" data-s="img/facade-front.jpg|Villa JIJI ზაფხულის საღამოს, ჭიშკრიდან">
+<img class="swap" src="img/winter-night.jpg" alt="Villa JIJI თოვლიან ღამეს, ანთებული გირლიანდით" data-w="img/winter-night.jpg|ვილა ჯიჯი თოვლიან ღამეს, ანთებული გირლიანდით" data-s="img/pool-tall.jpg|ვილა ჯიჯი და აუზი ზაფხულში">
 <canvas id="snow" aria-hidden="true"></canvas>
 <div class="cap">
 <div class="wrap">
-<p class="eyebrow">ბაკურიანი · თრიალეთის ქუჩა · 10 ნომერი</p>
 <h1 class="name">Villa JIJI</h1>
-<p class="tag" data-w="თოვლი გარეთ, ცეცხლი შიგნით" data-s="მზე ეზოში, მთა აივნიდან">თოვლი გარეთ, ცეცხლი შიგნით</p>
+<p class="tag">თქვენი საუკეთესო დასვენებისთვის</p>
 <div class="acts"><button class="btn lamp" type="button" id="heroFree">თავისუფალი ნომრები</button><a class="btn ghost" href="#rooms">ნომრების ნახვა</a></div>
 </div>
 </div>
@@ -399,7 +399,7 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 <section class="rooms" id="rooms" aria-label="ნომრები">
 <div class="wrap">
 <div class="head">
-<h2>ნომრები და ლუქსები</h2>
+<h2>ნომრები</h2>
 <p>ყველა ნომერი თბილია, აივნითა და ტელევიზორით. საუზმე ფასში შედის, ზუსტ ფასს თარიღის მიხედვით გეტყვით.</p>
 </div>
 <div class="rcards" id="roomList"></div>
@@ -448,10 +448,10 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 <script src="js/chat.js"></script>
 <script>
 {
-/* Room photos: drop files into img/rooms/ and list them here, e.g. double:['img/rooms/double-1.jpg','img/rooms/double-2.jpg'] */
-const ROOM_PHOTOS={double:[],budget:['img/rooms/budget-1.jpg','img/rooms/budget-2.jpg','img/rooms/budget-3.jpg','img/rooms/budget-4.jpg','img/rooms/budget-5.jpg','img/rooms/budget-6.jpg','img/rooms/budget-7.jpg'],family:['img/rooms/family-1.jpg','img/rooms/family-2.jpg','img/rooms/family-3.jpg','img/rooms/family-4.jpg','img/rooms/family-5.jpg','img/rooms/family-6.jpg','img/rooms/family-7.jpg','img/rooms/family-8.jpg','img/rooms/family-9.jpg','img/rooms/family-10.jpg'],duplex:['img/rooms/duplex-1.jpg','img/rooms/duplex-2.jpg','img/rooms/duplex-9.jpg','img/rooms/duplex-10.jpg','img/rooms/duplex-4.jpg','img/rooms/duplex-11.jpg','img/rooms/duplex-5.jpg','img/rooms/duplex-13.jpg','img/rooms/duplex-12.jpg','img/rooms/duplex-3.jpg','img/rooms/duplex-6.jpg','img/rooms/duplex-7.jpg','img/rooms/duplex-14.jpg','img/rooms/duplex-8.jpg'],lux:['img/rooms/lux-9.jpg','img/rooms/lux-6.jpg','img/rooms/lux-2.jpg','img/rooms/lux-11.jpg','img/rooms/lux-3.jpg','img/rooms/lux-12.jpg','img/rooms/lux-10.jpg','img/rooms/lux-1.jpg','img/rooms/lux-4.jpg','img/rooms/lux-13.jpg','img/rooms/lux-5.jpg','img/rooms/lux-7.jpg','img/rooms/lux-8.jpg'],large:[]};
-const ROOM_FEATS={budget:['1 საძინებელი','მისაღები დივნით, მანსარდაში','სამზარეულოს კუთხე','აივანი მთის ხედით','საშხაპე','ტელევიზორი','საუზმე ფასში'],duplex:['ორსართულიანი','2 საძინებელი','მანსარდა სახურავის ფანჯრით','მაღალი ჭერი მისაღებში','სამზარეულოს კუთხე','აივანი მთის ხედით','საუზმე ფასში'],double:['საუზმე ფასში','ტელევიზორი'],family:['1 საძინებელი','მისაღები ორსართულიანი საწოლით','სამზარეულოს კუთხე','აივანი ეზოს ხედით','საშხაპე, თმის საშრობი','ტელევიზორი','საუზმე ფასში'],lux:['2 იზოლირებული საძინებელი','მისაღები დივნით','სამზარეულოს კუთხე','აივანი მთის ხედით','საშხაპე, თმის საშრობი','ტელევიზორი','საუზმე ფასში'],large:['საუზმე ფასში','ტელევიზორი']};
-const ROOM_TEXT={budget:'ხელმისაწვდომი ვარიანტი ოჯახისთვის: საძინებელი აივნით, მყუდრო მისაღები ხის ჭერით და სამზარეულოს კუთხე.',duplex:'ორი დუპლექსი, თითო ორ დონეზე გაშლილი ბინა: ქვემოთ მისაღები მაღალი ხის ჭერით, სამზარეულო და საძინებელი აივნით, კიბით კი მანსარდაში ახვალთ, სადაც საწოლი და დივანია სახურავის ფანჯრის ქვეშ.',lux:'ორი ერთნაირი ლუქსი, თითო ცალკე ბინასავით: ორი იზოლირებული საძინებელი, მისაღები სამზარეულოს კუთხით (ინდუქციური ქურა, მიკროტალღური, მაცივარი, ჩაიდანი) და აივანი.',double:'წყვილისთვის: ორადგილიანი საწოლი, მშვიდი და თბილი ნომერი.',family:'ოჯახისთვის ბავშვებით: ცალკე საძინებელი მშობლებისთვის, მისაღებში კი ორსართულიანი საწოლი, სასადილო მაგიდა და სამზარეულოს კუთხე.',large:'დიდი ოჯახის ან ჯგუფისთვის, ერთად დასასვენებლად.'};
+/* Room photos: drop files into img/rooms/ and list them here, e.g. lux:['img/rooms/lux-1.jpg'] */
+const ROOM_PHOTOS={budget:['img/rooms/budget-1.jpg','img/rooms/budget-2.jpg','img/rooms/budget-3.jpg','img/rooms/budget-4.jpg','img/rooms/budget-5.jpg','img/rooms/budget-6.jpg','img/rooms/budget-7.jpg'],family:['img/rooms/family-1.jpg','img/rooms/family-2.jpg','img/rooms/family-3.jpg','img/rooms/family-4.jpg','img/rooms/family-5.jpg','img/rooms/family-6.jpg','img/rooms/family-7.jpg','img/rooms/family-8.jpg','img/rooms/family-9.jpg','img/rooms/family-10.jpg'],duplex:['img/rooms/duplex-1.jpg','img/rooms/duplex-2.jpg','img/rooms/duplex-9.jpg','img/rooms/duplex-10.jpg','img/rooms/duplex-4.jpg','img/rooms/duplex-11.jpg','img/rooms/duplex-5.jpg','img/rooms/duplex-13.jpg','img/rooms/duplex-12.jpg','img/rooms/duplex-3.jpg','img/rooms/duplex-6.jpg','img/rooms/duplex-7.jpg','img/rooms/duplex-14.jpg','img/rooms/duplex-8.jpg'],lux:['img/rooms/lux-9.jpg','img/rooms/lux-6.jpg','img/rooms/lux-2.jpg','img/rooms/lux-11.jpg','img/rooms/lux-3.jpg','img/rooms/lux-12.jpg','img/rooms/lux-10.jpg','img/rooms/lux-1.jpg','img/rooms/lux-4.jpg','img/rooms/lux-13.jpg','img/rooms/lux-5.jpg','img/rooms/lux-7.jpg','img/rooms/lux-8.jpg']};
+const ROOM_FEATS={budget:['1 საძინებელი','მისაღები დივნით, მანსარდაში','სამზარეულოს კუთხე','აივანი მთის ხედით','საშხაპე','ტელევიზორი','საუზმე ფასში'],duplex:['ორსართულიანი','2 საძინებელი','მანსარდა სახურავის ფანჯრით','მაღალი ჭერი მისაღებში','სამზარეულოს კუთხე','აივანი მთის ხედით','საუზმე ფასში'],family:['1 საძინებელი','მისაღები ორსართულიანი საწოლით','სამზარეულოს კუთხე','აივანი ეზოს ხედით','საშხაპე, თმის საშრობი','ტელევიზორი','საუზმე ფასში'],lux:['2 იზოლირებული საძინებელი','მისაღები დივნით','სამზარეულოს კუთხე','აივანი მთის ხედით','საშხაპე, თმის საშრობი','ტელევიზორი','საუზმე ფასში']};
+const ROOM_TEXT={budget:'ხელმისაწვდომი ვარიანტი ოჯახისთვის: საძინებელი აივნით, მყუდრო მისაღები ხის ჭერით და სამზარეულოს კუთხე.',duplex:'ორი დუპლექსი, თითო ორ დონეზე გაშლილი ბინა: ქვემოთ მისაღები მაღალი ხის ჭერით, სამზარეულო და საძინებელი აივნით, კიბით კი მანსარდაში ახვალთ, სადაც საწოლი და დივანია სახურავის ფანჯრის ქვეშ.',lux:'ორი ერთნაირი ლუქსი, თითო ცალკე ბინასავით: ორი იზოლირებული საძინებელი, მისაღები სამზარეულოს კუთხით (ინდუქციური ქურა, მიკროტალღური, მაცივარი, ჩაიდანი) და აივანი.',family:'ოჯახისთვის ბავშვებით: ცალკე საძინებელი მშობლებისთვის, მისაღებში კი ორსართულიანი საწოლი, სასადილო მაგიდა და სამზარეულოს კუთხე.',large:'დიდი ოჯახის ან ჯგუფისთვის, ერთად დასასვენებლად.'};
 const person='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>';
 const bed='<svg width="56" height="40" viewBox="0 0 56 40" fill="none" stroke="#8a97a8" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 34V8M4 24h48v10M4 24v-6h20v6M24 18h28v6"/><circle cx="14" cy="18" r="0"/></svg>';
 const renderRooms=()=>{document.getElementById('roomList').innerHTML=Object.entries(JIJI.types).filter(([k])=>JIJI.ROOMS.some(r=>r.type===k)).map(([k,t])=>{

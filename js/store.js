@@ -1,23 +1,21 @@
 /* Villa JIJI — shared data layer (demo: stored in this browser's localStorage).
    Later this file is the only one to swap for a real database (e.g. Supabase). */
 window.JIJI = (() => {
-  const KEY = 'jiji-demo-v2';
+  const KEY = 'jiji-demo-v3';
 
   // Room types. Each type has price "versions" by number of guests, set by the hotel
   // (not proportional): the smallest version that fits the group is used.
   // Prices are SAMPLE values in GEL per night, by season.
   const R = (guests, off, summer, winter, peak) => ({ guests, price: { peak, winter, summer, off } });
   const DEFAULT_TYPES = {
-    double: { name: 'ორადგილიანი', rates: [R(1, 100, 140, 170, 230), R(2, 120, 160, 190, 260)] },
     family: { name: 'საოჯახო, 1 საძინებლით', rates: [R(2, 150, 200, 240, 320), R(3, 165, 220, 265, 350), R(4, 180, 240, 290, 380), R(5, 195, 260, 310, 410)] },
     budget: { name: 'საოჯახო ბიუჯეტური, 1 საძინებლით', rates: [R(2, 120, 160, 200, 270), R(3, 135, 180, 225, 305), R(4, 150, 200, 250, 340)] },
     duplex: { name: 'დუპლექსი', rates: [R(2, 220, 300, 380, 500), R(3, 250, 340, 430, 560), R(4, 290, 390, 480, 620)] },
     lux:    { name: 'ლუქსი', rates: [R(2, 210, 290, 370, 480), R(3, 245, 335, 415, 540), R(4, 280, 380, 460, 600)] },
-    large:  { name: 'დიდი საოჯახო', rates: [R(4, 210, 280, 340, 450), R(6, 250, 330, 400, 520)] }
   };
   // 10 rooms. The split between types is a SAMPLE, the owner sets the real one.
   const ROOMS = [
-    { id: '101', type: 'double' }, { id: '102', type: 'double' }, { id: '103', type: 'family' },
+    { id: '103', type: 'family' },
     { id: '201', type: 'budget' }, { id: '202', type: 'budget' }, { id: '203', type: 'family' },
     { id: '204', type: 'duplex' }, { id: '301', type: 'duplex' }, { id: '302', type: 'lux' },
     { id: '303', type: 'lux' }
@@ -58,7 +56,7 @@ window.JIJI = (() => {
   function seed() {
     const t = today();
     const b = (room, from, n, name, phone, guests, status, source) => ({
-      id: uid(), room, type: ROOMS.find(r => r.id === room)?.type || 'double', from: addDays(t, from), to: addDays(t, from + n),
+      id: uid(), room, type: ROOMS.find(r => r.id === room)?.type || 'family', from: addDays(t, from), to: addDays(t, from + n),
       name, phone, guests, status, source, created: new Date().toISOString()
     });
     const pending = (type, from, n, name, phone, guests, source) => ({
@@ -70,14 +68,14 @@ window.JIJI = (() => {
       settings: { ...DEFAULT_SETTINGS },
       types,
       bookings: [
-        b('101', 1, 3, 'ნინო ბ.', '+995 555 10 20 30', 2, 'confirmed', 'admin'),
+        b('202', 1, 3, 'ნინო ბ.', '+995 555 10 20 30', 2, 'confirmed', 'admin'),
         b('103', 2, 4, 'გიორგი მ.', '+995 555 22 33 44', 4, 'confirmed', 'site'),
         b('203', 0, 2, 'Anna K.', '+48 600 100 200', 3, 'confirmed', 'chat'),
-        b('302', 5, 5, 'დავით ლ.', '+995 555 77 88 99', 6, 'confirmed', 'admin'),
+        b('302', 5, 5, 'დავით ლ.', '+995 555 77 88 99', 4, 'confirmed', 'admin'),
         b('201', 6, 2, 'Irina S.', '+7 900 123 45 67', 2, 'confirmed', 'chat'),
         b('301', 8, 3, 'თამარ ჯ.', '+995 555 40 50 60', 4, 'confirmed', 'site'),
         pending('family', 3, 3, 'ლევან ქ.', '+995 555 12 12 12', 4, 'chat'),
-        pending('double', 9, 2, 'Mark T.', '+44 7700 900123', 2, 'site')
+        pending('budget', 9, 2, 'Mark T.', '+44 7700 900123', 2, 'site')
       ]
     };
   }
@@ -88,6 +86,7 @@ window.JIJI = (() => {
     if (!state.settings) { state.settings = { ...DEFAULT_SETTINGS }; save(); }
     // add room types introduced after this browser first saved its data
     let added = false;
+    for (const k in state.types) if (!DEFAULT_TYPES[k]) { delete state.types[k]; added = true; }
     for (const k in DEFAULT_TYPES) if (!state.types[k]) { state.types[k] = JSON.parse(JSON.stringify(DEFAULT_TYPES[k])); syncCap(k); added = true; }
     if (added) save();
   }
