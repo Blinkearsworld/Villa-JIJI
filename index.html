@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Villa JIJI</title>
-<link rel="stylesheet" href="css/chat.css?v=202611191924">
+<link rel="stylesheet" href="css/chat.css?v=202611191935">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Georgian:wght@300;400;600&family=Noto+Sans+Georgian:wght@400;500;600&family=Cormorant:ital,wght@1,500;1,600&display=swap" rel="stylesheet">
@@ -452,8 +452,8 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 </section>
 </main>
 
-<script src="js/store.js?v=202611191924"></script>
-<script src="js/chat.js?v=202611191924"></script>
+<script src="js/store.js?v=202611191935"></script>
+<script src="js/chat.js?v=202611191935"></script>
 <script>
 {
 /* Room photos: drop files into img/rooms/ and list them here, e.g. lux:['img/rooms/lux-1.jpg'] */
@@ -512,7 +512,9 @@ form.addEventListener('submit',e=>{e.preventDefault();const a=inEl.value,b=outEl
  if(!nm||ph.replace(/\D/g,'').length<9)return say('ჩაწერეთ სახელი და ტელეფონის სრული ნომერი.');
  if(g>6)return say('7 და მეტი სტუმრისთვის დაგვირეკეთ: 596 90 40 60.');
  const o=JIJI.findOffer(a,b,g),n=JIJI.nights(a,b);
- if(!o){const nx=JIJI.nextOffer(a,n,g);return say('ამ თარიღებზე ადგილი აღარ გვაქვს.'+(nx?' უახლოესი თავისუფალი: '+JIJI.fmtRange(nx.from,nx.to)+'.':''))}
+ if(!o){const pt=JIJI.partialOffer(a,b,g),sp=JIJI.splitOffer(a,b,g),nx=JIJI.nextOffer(a,n,g);
+  const tips=[];if(sp)tips.push('მთელი '+n+' ღამე შესაძლებელია ნომრის ერთი გამოცვლით ('+sp.total+' ₾)');if(pt)tips.push(n+' ღამიდან თავისუფალია '+pt.n+': '+JIJI.fmtRange(pt.from,pt.to)+' ('+pt.total+' ₾)');if(nx)tips.push('სრული '+n+' ღამე: '+JIJI.fmtRange(nx.from,nx.to));
+  return say(tips.length?'ეს თარიღები მთლიანად თავისუფალი არ არის. შეგვიძლია შემოგთავაზოთ: '+tips.join('; ')+'. დეტალურად ჩატბოტი გაჩვენებთ.':'ამ თარიღებზე ადგილი აღარ გვაქვს. დაგვირეკეთ: 596 90 40 60.')}
  JIJI.createRequest({from:a,to:b,guests:g,name:nm,phone:ph,source:'site',type:o.type});
  form.reset();say('მოთხოვნა მიღებულია: '+JIJI.fmtRange(a,b)+', '+n+' ღამე, '+o.name+' ნომერი '+g+' სტუმარზე, '+o.total+' ₾ (სანიმუშო ფასი). ვილა ჯიჯი დაგიკავშირდებათ.')});
 

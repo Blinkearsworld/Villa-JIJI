@@ -114,6 +114,36 @@ export function findOffer(st, from, to, guests) {
   }
   return best;
 }
+// Longest run of free nights inside the asked period (when the whole period is not free).
+export function partialOffer(st, from, to, guests) {
+  let best = null;
+  for (const t of Object.keys(st.types)) {
+    if (!rateFor(st, t, guests)) continue;
+    for (const room of st.rooms.filter(r => r.type === t)) {
+      let start = null;
+      for (let d = from; ; d = addDays(d, 1)) {
+        const free = d < to && roomFree(st, room.id, d, addDays(d, 1));
+        if (free && start === null) start = d;
+        if (!free && start !== null) {
+          const n = nights(start, d), total = quote(st, t, start, d, guests);
+          if (!best || n > best.n || (n === best.n && total < best.total)) best = { from: start, to: d, n, type: t, name: st.types[t].name, total };
+          start = null;
+        }
+        if (d >= to) break;
+      }
+    }
+  }
+  return best && best.n < nights(from, to) ? best : null;
+}
+// The whole period with one change of room in the middle.
+export function splitOffer(st, from, to, guests) {
+  const n = nights(from, to); let best = null;
+  for (let k = 1; k < n; k++) {
+    const mid = addDays(from, k), a = findOffer(st, from, mid, guests), b = a && findOffer(st, mid, to, guests);
+    if (a && b && (!best || a.total + b.total < best.total)) best = { parts: [{ from, to: mid, ...a }, { from: mid, to, ...b }], total: a.total + b.total };
+  }
+  return best;
+}
 export function nextOffer(st, from, n, guests, days = 30) {
   for (let i = 1; i <= days; i++) {
     const f = addDays(from, i), o = findOffer(st, f, addDays(f, n), guests);

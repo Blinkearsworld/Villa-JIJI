@@ -125,6 +125,36 @@ window.JIJI = (() => {
     }
     return best;
   }
+  // Longest run of free nights inside the asked period (when the whole period is not free).
+  function partialOffer(from, to, guests) {
+    let best = null;
+    for (const t of Object.keys(state.types)) {
+      if (!rateFor(t, guests)) continue;
+      for (const room of ROOMS.filter(r => r.type === t)) {
+        let start = null;
+        for (let d = from; ; d = addDays(d, 1)) {
+          const free = d < to && roomFree(room.id, d, addDays(d, 1));
+          if (free && start === null) start = d;
+          if (!free && start !== null) {
+            const n = nights(start, d), total = quote(t, start, d, guests);
+            if (!best || n > best.n || (n === best.n && total < best.total)) best = { from: start, to: d, n, type: t, name: state.types[t].name, total };
+            start = null;
+          }
+          if (d >= to) break;
+        }
+      }
+    }
+    return best && best.n < nights(from, to) ? best : null;
+  }
+  // The whole period with one change of room in the middle.
+  function splitOffer(from, to, guests) {
+    const n = nights(from, to); let best = null;
+    for (let k = 1; k < n; k++) {
+      const mid = addDays(from, k), a = findOffer(from, mid, guests), b = a && findOffer(mid, to, guests);
+      if (a && b && (!best || a.total + b.total < best.total)) best = { parts: [{ from, to: mid, ...a }, { from: mid, to, ...b }], total: a.total + b.total };
+    }
+    return best;
+  }
   // Nearest start date within `days` days with the same length of stay.
   function nextOffer(from, n, guests, days = 30) {
     for (let i = 1; i <= days; i++) {
@@ -222,7 +252,7 @@ window.JIJI = (() => {
 
   return {
     ROOMS, SEASONS, get settings() { return state.settings; }, setSetting, siteSeason, get types() { return state.types; }, get bookings() { return state.bookings; },
-    today, addDays, nights, fmt, fmtRange, weekday, seasonOf, quote, rateFor, fromPrice, findOffer, nextOffer, roomFree,
+    today, addDays, nights, fmt, fmtRange, weekday, seasonOf, quote, rateFor, fromPrice, findOffer, nextOffer, partialOffer, splitOffer, roomFree,
     createRequest, confirm, decline, addManual, setRate, addRate, removeRate, remove, reset, onChange, onError, reload: load,
     ready, get mode() { return mode; }
   };

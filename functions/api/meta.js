@@ -1,7 +1,7 @@
 // /api/meta — Facebook Messenger and Instagram Direct webhook.
 // Same scripted flow as the site chatbot (no AI), answering from the same database.
 // Env (set as secrets in Cloudflare): META_VERIFY_TOKEN, META_APP_SECRET, META_PAGE_TOKEN; optional META_GRAPH_VERSION.
-import { loadState, findOffer, nextOffer, createRequest, addDays, today, fmt, fmtRange, json } from '../_lib/core.js';
+import { loadState, findOffer, nextOffer, partialOffer, splitOffer, createRequest, addDays, today, fmt, fmtRange, json } from '../_lib/core.js';
 
 const PHONE = '+995 596 90 40 60';
 const MAP = 'https://maps.google.com/?q=41.7318533,43.5301119';
@@ -108,7 +108,7 @@ async function handle(env, channel, ev) {
     await say('შესვლის თარიღი? დაწერეთ ასე: 15.01, ან აირჩიეთ:', [
       ['ეს შაბათი ' + fmt(nextSaturday()), 'D_' + nextSaturday()], ['შემდეგი შაბ. ' + fmt(nextSaturday(1)), 'D_' + nextSaturday(1)], BACK]);
   };
-  const askNights = async () => { c.step = 'nights'; await say('რამდენი ღამე?', [1, 2, 3, 4, 5, 7].map(n => [String(n), 'N_' + n]).concat([BACK])); };
+  const askNights = async () => { c.step = 'nights'; await say('რამდენი ღამე? აირჩიეთ ან ჩაწერეთ რიცხვი.', [1, 2, 3, 4, 5, 6, 7, 10, 14].map(n => [String(n), 'N_' + n]).concat([BACK])); };
   const askGuests = async () => { c.step = 'guests'; await say('რამდენი სტუმარი?', [1, 2, 3, 4, 5, 6].map(n => [String(n), 'G_' + n]).concat([['7 ან მეტი', 'G_7'], BACK])); };
   const offerText = (from, to, o) => `${fmtRange(from, to)} · ${c.n} ღამე · ${c.g} სტუმარი\nთავისუფალია: ${o.name}\n${o.total} ₾, საუზმით`;
   const contact = async (lead) => {
@@ -120,17 +120,34 @@ async function handle(env, channel, ev) {
     c.to = addDays(c.from, c.n);
     const o = findOffer(st, c.from, c.to, c.g);
     if (o) { c.step = 'offer'; c.type = o.type; c.total = o.total; c.typeName = o.name; return say(offerText(c.from, c.to, o), [['დაჯავშნა', 'BOOK'], ['სხვა თარიღი', 'AVAIL'], BACK]); }
-    const nx = nextOffer(st, c.from, c.n, c.g);
-    if (nx) {
-      c.step = 'offer'; c.alt = nx;
-      return say(`ამ თარიღებზე ადგილი აღარ გვაქვს.\nუახლოესი თავისუფალი:\n${offerText(nx.from, nx.to, nx)}`, [['ეს მინდა', 'ALT'], ['სხვა თარიღი', 'AVAIL'], ['დაკავშირება', 'CONTACT']]);
+    const part = partialOffer(st, c.from, c.to, c.g), split = splitOffer(st, c.from, c.to, c.g), nx = nextOffer(st, c.from, c.n, c.g);
+    if (!part && !split && !nx) {
+      c.step = 'menu';
+      return say('ამ პერიოდში ადგილი აღარ გვაქვს. დაგვიკავშირდით და იქნებ მაინც მოგიძებნოთ გამოსავალი.', [['დაკავშირება', 'CONTACT'], ['სხვა თარიღი', 'AVAIL'], BACK]);
     }
-    c.step = 'menu';
-    return say('ამ პერიოდში ადგილი აღარ გვაქვს. დაგვიკავშირდით და იქნებ მაინც მოგიძებნოთ გამოსავალი.', [['დაკავშირება', 'CONTACT'], ['სხვა თარიღი', 'AVAIL'], BACK]);
+    c.step = 'offer'; c.alts = {};
+    const lines = [`${fmtRange(c.from, c.to)} (${c.n} ღამე) მთლიანად თავისუფალი არ გვაქვს, მაგრამ შეგვიძლია შემოგთავაზოთ:`], btns = [];
+    if (split) {
+      const [x, y] = split.parts;
+      lines.push(`\n1) მთელი ${c.n} ღამე, ნომრის ერთი გამოცვლით:\n${fmtRange(x.from, x.to)} · ${x.name}\n${fmtRange(y.from, y.to)} · ${y.name}\n${split.total} ₾, საუზმით`);
+      c.alts.SPLIT = { parts: split.parts.map(p => ({ from: p.from, to: p.to })), typeName: x.name + ' → ' + y.name, total: split.total };
+      btns.push([`მთელი ${c.n} ღამე`, 'PICK_SPLIT']);
+    }
+    if (part) {
+      lines.push(`\n${lines.length}) ${c.n} ღამიდან თავისუფალია ${part.n}:\n${fmtRange(part.from, part.to)} · ${part.name}\n${part.total} ₾, საუზმით`);
+      c.alts.PART = { parts: [{ from: part.from, to: part.to }], typeName: part.name, total: part.total };
+      btns.push([`${part.n} ღამე`, 'PICK_PART']);
+    }
+    if (nx) {
+      lines.push(`\n${lines.length}) სრული ${c.n} ღამე სხვა თარიღებში:\n${fmtRange(nx.from, nx.to)} · ${nx.name}\n${nx.total} ₾, საუზმით`);
+      c.alts.NEXT = { parts: [{ from: nx.from, to: nx.to }], typeName: nx.name, total: nx.total };
+      btns.push([fmtRange(nx.from, nx.to), 'PICK_NEXT']);
+    }
+    return say(lines.join('\n'), [...btns, ['სხვა თარიღი', 'AVAIL'], ['დაკავშირება', 'CONTACT']]);
   };
 
   try {
-    if (payload === 'MENU' || c.step === 'new' || /^(მენიუ|გამარჯობა|სალამი|hi|hello|menu|start)$/i.test(text)) await menu(c.step === 'new');
+    if (payload === 'MENU' || (c.step === 'new' && !payload) || /^(მენიუ|გამარჯობა|სალამი|hi|hello|menu|start)$/i.test(text)) await menu(c.step === 'new');
     else if (payload === 'AVAIL') await askDate();
     else if (payload === 'LOC') { c.step = 'menu'; await say(`თრიალეთის ქუჩა, ბაკურიანი\nკოხტას საბაგირო 300 მეტრშია, დიდველის საბაგირო 2,9 კმ-ში.\n${MAP}`, [['ნომრები და ფასი', 'AVAIL'], BACK]); }
     else if (payload === 'FAQ') { c.step = 'menu'; await say('აირჩიეთ კითხვა:', FAQ.map(([q], i) => [q, 'FAQ_' + i]).concat([BACK])); }
@@ -141,22 +158,27 @@ async function handle(env, channel, ev) {
       if (!d || d < today()) await say('თარიღი ვერ გავიგე. დაწერეთ ასე: 15.01', [BACK]);
       else { c.from = d; await askNights(); }
     }
-    else if (payload?.startsWith('N_')) { c.n = +payload.slice(2); await askGuests(); }
+    else if (payload?.startsWith('N_') || (c.step === 'nights' && /^\d{1,2}$/.test(text))) {
+      const n = payload?.startsWith('N_') ? +payload.slice(2) : +text;
+      if (n < 1 || n > 30) await say('ჩაწერეთ ღამეების რაოდენობა 1-დან 30-მდე.', [BACK]);
+      else { c.n = n; await askGuests(); }
+    }
     else if (payload?.startsWith('G_')) {
       c.g = +payload.slice(2);
       if (c.g > 6) await contact('7 და მეტი სტუმრისთვის რამდენიმე ნომერს გავაერთიანებთ, ამას ვილა ჯიჯი პირადად შეგითანხმებთ.');
       else await check();
     }
-    else if (payload === 'ALT' && c.alt) { Object.assign(c, { from: c.alt.from, to: c.alt.to, type: c.alt.type, total: c.alt.total, typeName: c.alt.name }); delete c.alt; c.step = 'name'; await say('თქვენი სახელი?'); }
-    else if (payload === 'BOOK') { c.step = 'name'; await say('თქვენი სახელი?'); }
+    else if (payload?.startsWith('PICK_') && c.alts?.[payload.slice(5)]) { c.pick = c.alts[payload.slice(5)]; delete c.alts; c.step = 'name'; await say('თქვენი სახელი?'); }
+    else if (payload === 'BOOK') { c.pick = { parts: [{ from: c.from, to: c.to }], typeName: c.typeName, total: c.total }; c.step = 'name'; await say('თქვენი სახელი?'); }
     else if (c.step === 'name' && text) { c.name = text.slice(0, 80); c.step = 'phone'; await say('ტელეფონის ნომერი, რომ დაგიკავშირდეთ?'); }
     else if (c.step === 'phone' && text) {
       if (text.replace(/\D/g, '').length < 9) await say('ნომერი მოკლეა, გთხოვთ სრულად ჩაწეროთ.');
       else {
-        const st = await loadState(db);
-        const r = await createRequest(db, st, { from: c.from, to: c.to, guests: c.g, name: c.name, phone: text, source: channel === 'ig' ? 'instagram' : 'facebook' });
-        c.step = 'menu';
-        await say(`მოთხოვნა მიღებულია.\n${fmtRange(c.from, c.to)} · ${r.typeName} · ${r.total} ₾\n\nვილა ჯიჯი დაგიკავშირდებათ ნომერზე ${text} ჯავშნის დასადასტურებლად. გადახდა საჭირო არ არის.`, [BACK]);
+        const st = await loadState(db), pick = c.pick || { parts: [{ from: c.from, to: c.to }], typeName: c.typeName, total: c.total };
+        for (const p of pick.parts) await createRequest(db, st, { from: p.from, to: p.to, guests: c.g, name: c.name, phone: text, source: channel === 'ig' ? 'instagram' : 'facebook' });
+        const first = pick.parts[0].from, last = pick.parts[pick.parts.length - 1].to;
+        c.step = 'menu'; delete c.pick;
+        await say(`მოთხოვნა მიღებულია.\n${fmtRange(first, last)} · ${pick.typeName} · ${pick.total} ₾\n\nვილა ჯიჯი დაგიკავშირდებათ ნომერზე ${text} ჯავშნის დასადასტურებლად. გადახდა საჭირო არ არის.`, [BACK]);
       }
     }
     else {

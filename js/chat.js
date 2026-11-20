@@ -146,18 +146,35 @@
       options([{ t: 'დაჯავშნა', f: askName }, { t: 'სხვა თარიღი', f: askDate }, ...nav()]);
       return;
     }
+    // Not all nights are free: suggest what is possible instead of a plain "no".
+    const part = J.partialOffer(ctx.from, ctx.to, g);
+    const split = J.splitOffer(ctx.from, ctx.to, g);
     const nx = J.nextOffer(ctx.from, ctx.n, g);
-    if (nx) {
-      bot(`${J.fmtRange(ctx.from, ctx.to)} ${g} სტუმრისთვის ადგილი აღარ გვაქვს.\nუახლოესი თავისუფალი:`);
-      bot(offerHtml(nx.from, nx.to, ctx.n, g, nx), 'offer');
-      options([
-        { t: 'ეს მინდა', f: () => { ctx.from = nx.from; ctx.to = nx.to; ctx.offer = nx; askName(); } },
-        { t: 'სხვა თარიღი', f: askDate }, { t: 'ვილა ჯიჯისთან დაკავშირება', f: contact, sub: true }
-      ]);
-    } else {
+    if (!part && !split && !nx) {
       bot('ამ პერიოდში ადგილი აღარ გვაქვს. დაგვიკავშირდით და იქნებ მაინც მოგიძებნოთ გამოსავალი.');
       options([{ t: 'ვილა ჯიჯისთან დაკავშირება', f: contact }, { t: 'სხვა თარიღი', f: askDate }, ...nav()]);
+      return;
     }
+    bot(`${J.fmtRange(ctx.from, ctx.to)} (${ctx.n} ღამე) ${g} სტუმრისთვის მთლიანად თავისუფალი არ გვაქვს, მაგრამ შეგვიძლია შემოგთავაზოთ:`);
+    const opts = [];
+    if (split) {
+      const [x, y] = split.parts;
+      bot(`<b>მთელი ${ctx.n} ღამე, ნომრის ერთი გამოცვლით</b>
+${J.fmtRange(x.from, x.to)} · ${esc(x.name)}
+${J.fmtRange(y.from, y.to)} · ${esc(y.name)}<strong>${split.total} ₾</strong>საუზმით · სანიმუშო ფასი`, 'offer');
+      opts.push({ t: `მთელი ${ctx.n} ღამე`, f: () => { ctx.split = split.parts; ctx.offer = { name: x.name + ' → ' + y.name, total: split.total }; askName(); } });
+    }
+    if (part) {
+      bot(`<b>${ctx.n} ღამიდან ${part.n} ღამე თავისუფალია</b>
+${J.fmtRange(part.from, part.to)} · ${esc(part.name)}<strong>${part.total} ₾</strong>საუზმით · სანიმუშო ფასი`, 'offer');
+      opts.push({ t: `${part.n} ღამე: ${J.fmtRange(part.from, part.to)}`, f: () => { ctx.from = part.from; ctx.to = part.to; ctx.offer = part; delete ctx.split; askName(); } });
+    }
+    if (nx) {
+      bot(`<b>სრული ${ctx.n} ღამე სხვა თარიღებში</b>
+${J.fmtRange(nx.from, nx.to)} · ${esc(nx.name)}<strong>${nx.total} ₾</strong>საუზმით · სანიმუშო ფასი`, 'offer');
+      opts.push({ t: `${J.fmtRange(nx.from, nx.to)}`, f: () => { ctx.from = nx.from; ctx.to = nx.to; ctx.offer = nx; delete ctx.split; askName(); } });
+    }
+    options([...opts, { t: 'სხვა თარიღი', f: askDate, sub: true }, { t: 'დაკავშირება', f: contact, sub: true }]);
   }
   function group() {
     bot('7 და მეტი სტუმრისთვის რამდენიმე ნომერს გავაერთიანებთ. ამას ვილა ჯიჯი პირადად შეგითანხმებთ.');
@@ -166,7 +183,10 @@
   function askName() { bot('თქვენი სახელი?'); mode = 'name'; setInput('text', 'სახელი'); options(nav()); }
   function askPhone() { bot('ტელეფონის ნომერი, რომ დაგიკავშირდეთ?'); mode = 'phone'; setInput('tel', '+995 5…'); options(nav()); }
   function finish() {
-    const r = J.createRequest({ from: ctx.from, to: ctx.to, guests: ctx.g, name: ctx.name, phone: ctx.phone, source: 'chat', type: ctx.offer.type });
+    const parts = ctx.split || [{ from: ctx.from, to: ctx.to, type: ctx.offer.type }];
+    parts.forEach(p => J.createRequest({ from: p.from, to: p.to, guests: ctx.g, name: ctx.name, phone: ctx.phone, source: 'chat', type: p.type }));
+    const r = { from: parts[0].from, to: parts[parts.length - 1].to };
+    delete ctx.split;
     mode = 'menu'; setInput(null);
     bot(`მოთხოვნა მიღებულია.\n${J.fmtRange(r.from, r.to)} · ${esc(ctx.offer.name)} · ${ctx.offer.total} ₾\n\nვილა ჯიჯი დაგიკავშირდებათ ნომერზე ${esc(ctx.phone)} ჯავშნის დასადასტურებლად. გადახდა საჭირო არ არის.`);
     options(nav());
