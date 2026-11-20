@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Villa JIJI</title>
-<link rel="stylesheet" href="css/chat.css?v=202611200526">
+<link rel="stylesheet" href="css/chat.css?v=202611200548">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Georgian:wght@300;400;600&family=Noto+Serif:wght@300;400;600&family=Noto+Sans+Georgian:wght@400;500;600&family=Noto+Sans:wght@400;500;600&family=Cormorant:ital,wght@1,500;1,600&display=swap" rel="stylesheet">
@@ -362,7 +362,7 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 <div class="sp"><img src="img/inside/game-room.jpg" alt="თამაშების ოთახი ბილიარდით და დიდი ეკრანით" loading="lazy"><div class="t"><h3>თამაშების ოთახი</h3><p>ბილიარდი, დიდი ეკრანი და ხმის სისტემა</p></div></div>
 <div class="sp"><img src="img/inside/cinema-corner.jpg" alt="კინოს კუთხე დივნით, ბუხრით და პროექტორით" loading="lazy"><div class="t"><h3>კინოღამეები</h3><p>პროექტორი, რბილი დივანი და ბუხარი</p></div></div>
 <div class="sp"><img src="img/inside/lounge-bar.jpg" alt="ლაუნჯი დივნებით, ბარის დახლით და სასადილო მაგიდებით" loading="lazy"><div class="t"><h3>ლაუნჯი და ბარი</h3><p>ბარის დახლი, ტელევიზორი, ჭადრაკი</p></div></div>
-<div class="sp"><img src="img/lounge-wide.jpg" alt="სასადილო სივრცე და დივნები გიტარით" loading="lazy"><div class="t"><h3>სასადილო სივრცე</h3><p>აქ ისაუზმებთ და ერთად ივახშმებთ</p></div></div>
+<div class="sp"><img src="img/lounge-wide.jpg" alt="სასადილო სივრცე და დივნები გიტარით" loading="lazy"><div class="t"><h3>სასადილო სივრცე</h3><p>საერთო მაგიდა, სადაც სტუმრები ერთად სხდებიან</p></div></div>
 </div>
 </div>
 </section>
@@ -412,7 +412,7 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 <div class="wrap">
 <div class="head">
 <h2>ნომრები</h2>
-<p>ყველა ნომერი თბილია, აივნითა და ტელევიზორით. საუზმე ფასში შედის, ზუსტ ფასს თარიღის მიხედვით გეტყვით.</p>
+<p>ყველა ნომერი თბილია, აივნით, ტელევიზორით და სამზარეულოს კუთხით. ზუსტ ფასს თარიღის მიხედვით გეტყვით.</p>
 </div>
 <div class="rcards" id="roomList"></div>
 <p class="rnote">ფასები და ნომრების რაოდენობა სანიმუშოა, ზუსტს ვილა ჯიჯი დააზუსტებს.</p>
@@ -456,14 +456,14 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 </section>
 </main>
 
-<script src="js/i18n.js?v=202611200526"></script>
-<script src="js/store.js?v=202611200526"></script>
-<script src="js/chat.js?v=202611200526"></script>
+<script src="js/i18n.js?v=202611200548"></script>
+<script src="js/store.js?v=202611200548"></script>
+<script src="js/chat.js?v=202611200548"></script>
 <script>
 {
 /* Room photos: drop files into img/rooms/ and list them here, e.g. lux:['img/rooms/lux-1.jpg'] */
 const ROOM_PHOTOS={budget:['img/rooms/budget-1.jpg','img/rooms/budget-2.jpg','img/rooms/budget-3.jpg','img/rooms/budget-4.jpg','img/rooms/budget-5.jpg','img/rooms/budget-6.jpg','img/rooms/budget-7.jpg'],family:['img/rooms/family-1.jpg','img/rooms/family-2.jpg','img/rooms/family-3.jpg','img/rooms/family-4.jpg','img/rooms/family-5.jpg','img/rooms/family-6.jpg','img/rooms/family-7.jpg','img/rooms/family-8.jpg','img/rooms/family-9.jpg','img/rooms/family-10.jpg'],duplex:['img/rooms/duplex-1.jpg','img/rooms/duplex-2.jpg','img/rooms/duplex-9.jpg','img/rooms/duplex-10.jpg','img/rooms/duplex-4.jpg','img/rooms/duplex-11.jpg','img/rooms/duplex-5.jpg','img/rooms/duplex-13.jpg','img/rooms/duplex-12.jpg','img/rooms/duplex-3.jpg','img/rooms/duplex-6.jpg','img/rooms/duplex-7.jpg','img/rooms/duplex-14.jpg','img/rooms/duplex-8.jpg'],lux:['img/rooms/lux-9.jpg','img/rooms/lux-6.jpg','img/rooms/lux-2.jpg','img/rooms/lux-11.jpg','img/rooms/lux-3.jpg','img/rooms/lux-12.jpg','img/rooms/lux-10.jpg','img/rooms/lux-1.jpg','img/rooms/lux-4.jpg','img/rooms/lux-13.jpg','img/rooms/lux-5.jpg','img/rooms/lux-7.jpg','img/rooms/lux-8.jpg']};
-const ROOM_FEATS={budget:['1 საძინებელი','მისაღები დივნით, მანსარდაში','სამზარეულოს კუთხე','აივანი მთის ხედით','საშხაპე','ტელევიზორი','საუზმე ფასში'],duplex:['ორსართულიანი','2 საძინებელი','მანსარდა სახურავის ფანჯრით','მაღალი ჭერი მისაღებში','სამზარეულოს კუთხე','აივანი მთის ხედით','საუზმე ფასში'],family:['1 საძინებელი','მისაღები ორსართულიანი საწოლით','სამზარეულოს კუთხე','აივანი ეზოს ხედით','საშხაპე, თმის საშრობი','ტელევიზორი','საუზმე ფასში'],lux:['2 იზოლირებული საძინებელი','მისაღები დივნით','სამზარეულოს კუთხე','აივანი მთის ხედით','საშხაპე, თმის საშრობი','ტელევიზორი','საუზმე ფასში']};
+const ROOM_FEATS={budget:['1 საძინებელი','მისაღები დივნით, მანსარდაში','სამზარეულოს კუთხე','აივანი მთის ხედით','საშხაპე','ტელევიზორი'],duplex:['ორსართულიანი','2 საძინებელი','მანსარდა სახურავის ფანჯრით','მაღალი ჭერი მისაღებში','სამზარეულოს კუთხე','აივანი მთის ხედით'],family:['1 საძინებელი','მისაღები ორსართულიანი საწოლით','სამზარეულოს კუთხე','აივანი ეზოს ხედით','საშხაპე, თმის საშრობი','ტელევიზორი'],lux:['2 იზოლირებული საძინებელი','მისაღები დივნით','სამზარეულოს კუთხე','აივანი მთის ხედით','საშხაპე, თმის საშრობი','ტელევიზორი']};
 const ROOM_TEXT={budget:'ხელმისაწვდომი ვარიანტი ოჯახისთვის: საძინებელი აივნით, მყუდრო მისაღები ხის ჭერით და სამზარეულოს კუთხე.',duplex:'ორი დუპლექსი, თითო ორ დონეზე გაშლილი ბინა: ქვემოთ მისაღები მაღალი ხის ჭერით, სამზარეულო და საძინებელი აივნით, კიბით კი მანსარდაში ახვალთ, სადაც საწოლი და დივანია სახურავის ფანჯრის ქვეშ.',lux:'ორი ერთნაირი ლუქსი, თითო ცალკე ბინასავით: ორი იზოლირებული საძინებელი, მისაღები სამზარეულოს კუთხით (ინდუქციური ქურა, მიკროტალღური, მაცივარი, ჩაიდანი) და აივანი.',family:'ოჯახისთვის ბავშვებით: ცალკე საძინებელი მშობლებისთვის, მისაღებში კი ორსართულიანი საწოლი, სასადილო მაგიდა და სამზარეულოს კუთხე.',large:'დიდი ოჯახის ან ჯგუფისთვის, ერთად დასასვენებლად.'};
 const person='<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>';
 const bed='<svg width="56" height="40" viewBox="0 0 56 40" fill="none" stroke="#8a97a8" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M4 34V8M4 24h48v10M4 24v-6h20v6M24 18h28v6"/><circle cx="14" cy="18" r="0"/></svg>';

@@ -151,7 +151,7 @@
     ]);
   }
   function offerHtml(from, to, n, g, o) {
-    return `${T('{d} · {n} ღამე · {g} სტუმარი', { d: J.fmtRange(from, to), n, g })}\n${T('თავისუფალია: {room} ნომერი', { room: esc(RN(o.name)) })}<strong>${o.total} ₾</strong>${T('საუზმით · სანიმუშო ფასი')}`;
+    return `${T('{d} · {n} ღამე · {g} სტუმარი', { d: J.fmtRange(from, to), n, g })}\n${T('თავისუფალია: {room} ნომერი', { room: esc(RN(o.name)) })}<strong>${o.total} ₾</strong>${T('სანიმუშო ფასი')}`;
   }
   function check(g) {
     ctx.g = g; ctx.to = J.addDays(ctx.from, ctx.n);
@@ -179,17 +179,17 @@
       const [x, y] = split.parts;
       bot(`<b>${T('მთელი {n} ღამე, ნომრის ერთი გამოცვლით', { n: ctx.n })}</b>
 ${J.fmtRange(x.from, x.to)} · ${esc(RN(x.name))}
-${J.fmtRange(y.from, y.to)} · ${esc(RN(y.name))}<strong>${split.total} ₾</strong>${T('საუზმით · სანიმუშო ფასი')}`, 'offer');
+${J.fmtRange(y.from, y.to)} · ${esc(RN(y.name))}<strong>${split.total} ₾</strong>${T('სანიმუშო ფასი')}`, 'offer');
       opts.push({ t: T('მთელი {n} ღამე', { n: ctx.n }), f: () => { ctx.split = split.parts; ctx.offer = { name: RN(x.name) + ' → ' + RN(y.name), total: split.total }; askName(); } });
     }
     if (part) {
       bot(`<b>${T('{n} ღამიდან {k} ღამე თავისუფალია', { n: ctx.n, k: part.n })}</b>
-${J.fmtRange(part.from, part.to)} · ${esc(RN(part.name))}<strong>${part.total} ₾</strong>${T('საუზმით · სანიმუშო ფასი')}`, 'offer');
+${J.fmtRange(part.from, part.to)} · ${esc(RN(part.name))}<strong>${part.total} ₾</strong>${T('სანიმუშო ფასი')}`, 'offer');
       opts.push({ t: T('{k} ღამე: {d}', { k: part.n, d: J.fmtRange(part.from, part.to) }), f: () => { ctx.from = part.from; ctx.to = part.to; ctx.offer = part; delete ctx.split; askName(); } });
     }
     if (nx) {
       bot(`<b>${T('სრული {n} ღამე სხვა თარიღებში', { n: ctx.n })}</b>
-${J.fmtRange(nx.from, nx.to)} · ${esc(RN(nx.name))}<strong>${nx.total} ₾</strong>${T('საუზმით · სანიმუშო ფასი')}`, 'offer');
+${J.fmtRange(nx.from, nx.to)} · ${esc(RN(nx.name))}<strong>${nx.total} ₾</strong>${T('სანიმუშო ფასი')}`, 'offer');
       opts.push({ t: `${J.fmtRange(nx.from, nx.to)}`, f: () => { ctx.from = nx.from; ctx.to = nx.to; ctx.offer = nx; delete ctx.split; askName(); } });
     }
     options([...opts, { t: T('სხვა თარიღი'), f: askDate, sub: true }, { t: T('დაკავშირება'), f: contact, sub: true }]);
@@ -205,7 +205,7 @@ ${J.fmtRange(nx.from, nx.to)} · ${esc(RN(nx.name))}<strong>${nx.total} ₾</str
     const list = uniqGaps(), d = J.gapDiscount();
     if (!list.length) { bot(T('ამჟამად მოკლე შეთავაზება არ გვაქვს. ნახეთ თავისუფალი თარიღები კალენდარში.')); options([{ t: T('თავისუფალი ნომრები'), f: askDate }, ...nav()]); return; }
     bot(`${T('ორ ჯავშანს შორის დარჩენილი 1–3 ღამე')}${d ? T(', <b>{d}% ფასდაკლებით</b>', { d }) : ''}:`);
-    list.forEach(g => bot(`<b>${T('{d} · {n} ღამე', { d: J.fmtRange(g.from, g.to), n: g.n })}</b>\n${T('{room} · {g} სტუმრამდე', { room: esc(RN(J.types[g.type].name)), g: maxGuests(g.type) })}<strong>${T('{p} ₾-დან', { p: gapPrice(g, 1) })}</strong>${T('საუზმით · სანიმუშო ფასი')}`, 'offer'));
+    list.forEach(g => bot(`<b>${T('{d} · {n} ღამე', { d: J.fmtRange(g.from, g.to), n: g.n })}</b>\n${T('{room} · {g} სტუმრამდე', { room: esc(RN(J.types[g.type].name)), g: maxGuests(g.type) })}<strong>${T('{p} ₾-დან', { p: gapPrice(g, 1) })}</strong>${T('სანიმუშო ფასი')}`, 'offer'));
     options([...list.map(g => ({ t: `${J.fmtRange(g.from, g.to)} · ${RN(J.types[g.type].name)}`, f: () => pickGap(g) })), ...nav()]);
   }
   function pickGap(g) {
@@ -218,7 +218,7 @@ ${J.fmtRange(nx.from, nx.to)} · ${esc(RN(nx.name))}<strong>${nx.total} ₾</str
     const g = ctx.gap; ctx.g = n;
     const total = gapPrice(g, n), name = RN(J.types[g.type].name);
     ctx.offer = { type: g.type, name, total, note: J.gapDiscount() ? `ფანჯარა −${J.gapDiscount()}%` : 'ფანჯარა' };
-    bot(`${T('{d} · {n} ღამე · {g} სტუმარი', { d: J.fmtRange(g.from, g.to), n: g.n, g: n })}\n${esc(name)}<strong>${total} ₾</strong>${J.gapDiscount() ? T('ჩვეულებრივ {p} ₾ · ', { p: J.quote(g.type, g.from, g.to, n) }) : ''}${T('საუზმით')}`, 'offer');
+    bot(`${T('{d} · {n} ღამე · {g} სტუმარი', { d: J.fmtRange(g.from, g.to), n: g.n, g: n })}\n${esc(name)}<strong>${total} ₾</strong>${J.gapDiscount() ? T('ჩვეულებრივ {p} ₾ · ', { p: J.quote(g.type, g.from, g.to, n) }) : ''}${T('სანიმუშო ფასი')}`, 'offer');
     options([{ t: T('დაჯავშნა'), f: askName }, { t: T('სხვა შეთავაზება'), f: deals }, ...nav()]);
   }
   function group() {
@@ -242,7 +242,7 @@ ${J.fmtRange(nx.from, nx.to)} · ${esc(RN(nx.name))}<strong>${nx.total} ₾</str
     options([{ t: T('თავისუფალი ნომრები'), f: askDate }, ...nav()]);
   }
   const FAQ = [
-    ['საუზმე შედის?', 'დიახ, საუზმე ფასში შედის.'],
+    ['კვება გაქვთ?', 'ვილა ჯიჯიში კვება არ არის, სამაგიეროდ ყველა ნომერს აქვს სამზარეულოს კუთხე. მაღაზიები ფეხით მისასვლელზეა, ბაკურიანში კი ბევრი კაფე და რესტორანია.'],
     ['ცხოველით შეიძლება?', 'დიახ, შინაური ცხოველებით მოსვლა შეიძლება. წინასწარ გაგვაფრთხილეთ.'],
     ['პარკინგი გაქვთ?', 'დიახ, პარკინგი უფასოა.'],
     ['აუზი როდის მუშაობს?', 'ღია აუზი სეზონურია, თბილ თვეებში მუშაობს. ზუსტ თარიღებს ვილა ჯიჯი გეტყვით.'],

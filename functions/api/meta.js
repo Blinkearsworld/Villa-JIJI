@@ -15,7 +15,7 @@ const WANTS_HUMAN = /ადამიან|ოპერატორ|ადმი
 // reception hours in Georgia (UTC+4)
 const openNow = () => { const h = (new Date().getUTCHours() + 4) % 24; return h >= 10 && h < 20; };
 const FAQ = [
-  ['საუზმე შედის?', 'დიახ, საუზმე ფასში შედის.'],
+  ['კვება', 'ვილა ჯიჯიში კვება არ არის, სამაგიეროდ ყველა ნომერს აქვს სამზარეულოს კუთხე. მაღაზიები ფეხით მისასვლელზეა, ბაკურიანში კი ბევრი კაფე და რესტორანია.'],
   ['ცხოველით შეიძლება?', 'დიახ, შინაური ცხოველებით მოსვლა შეიძლება. წინასწარ გაგვაფრთხილეთ.'],
   ['პარკინგი', 'დიახ, პარკინგი უფასოა.'],
   ['აუზი', 'ღია აუზი სეზონურია, თბილ თვეებში მუშაობს.'],
@@ -129,7 +129,7 @@ async function handle(env, channel, ev) {
   };
   const askNights = async () => { c.step = 'nights'; await say('რამდენი ღამე? აირჩიეთ ან ჩაწერეთ რიცხვი.', [1, 2, 3, 4, 5, 6, 7, 10, 14].map(n => [String(n), 'N_' + n]).concat([BACK])); };
   const askGuests = async () => { c.step = 'guests'; await say('რამდენი სტუმარი?', [1, 2, 3, 4, 5, 6].map(n => [String(n), 'G_' + n]).concat([['7 ან მეტი', 'G_7'], BACK])); };
-  const offerText = (from, to, o) => `${fmtRange(from, to)} · ${c.n} ღამე · ${c.g} სტუმარი\nთავისუფალია: ${o.name}\n${o.total} ₾, საუზმით`;
+  const offerText = (from, to, o) => `${fmtRange(from, to)} · ${c.n} ღამე · ${c.g} სტუმარი\nთავისუფალია: ${o.name}\n${o.total} ₾`;
   const contact = async (lead) => {
     c.step = 'menu'; c.handoff = Date.now() + HANDOFF_MS;
     const when = openNow() ? 'ვილა ჯიჯის თანამშრომელი აქვე გიპასუხებთ, დაწერეთ თქვენი კითხვა.' : 'ახლა სამუშაო საათები არ არის, ვილა ჯიჯის თანამშრომელი დილით 10:00-დან გიპასუხებთ. დაწერეთ თქვენი კითხვა.';
@@ -151,7 +151,7 @@ async function handle(env, channel, ev) {
     const total = gapPrice(st, g, n), name = st.types[g.type].name, d = gapDiscount(st);
     c.g = n; c.step = 'offer';
     c.pick = { parts: [{ from: g.from, to: g.to, type: g.type }], typeName: name, total, gap: true };
-    return say(`${fmtRange(g.from, g.to)} · ${g.n} ღამე · ${n} სტუმარი\n${name}\n${total} ₾, საუზმით${d ? ` (ჩვეულებრივ ${quote(st, g.type, g.from, g.to, n)} ₾)` : ''}`, [['დაჯავშნა', 'GBOOK'], ['სხვა შეთავაზება', 'DEALS'], BACK]);
+    return say(`${fmtRange(g.from, g.to)} · ${g.n} ღამე · ${n} სტუმარი\n${name}\n${total} ₾${d ? ` (ჩვეულებრივ ${quote(st, g.type, g.from, g.to, n)} ₾)` : ''}`, [['დაჯავშნა', 'GBOOK'], ['სხვა შეთავაზება', 'DEALS'], BACK]);
   };
   const check = async () => {
     const st = await loadState(db);
@@ -169,17 +169,17 @@ async function handle(env, channel, ev) {
     const lines = [`${fmtRange(c.from, c.to)} (${c.n} ღამე) მთლიანად თავისუფალი არ გვაქვს, მაგრამ შეგვიძლია შემოგთავაზოთ:`], btns = [];
     if (split) {
       const [x, y] = split.parts;
-      lines.push(`\n1) მთელი ${c.n} ღამე, ნომრის ერთი გამოცვლით:\n${fmtRange(x.from, x.to)} · ${x.name}\n${fmtRange(y.from, y.to)} · ${y.name}\n${split.total} ₾, საუზმით`);
+      lines.push(`\n1) მთელი ${c.n} ღამე, ნომრის ერთი გამოცვლით:\n${fmtRange(x.from, x.to)} · ${x.name}\n${fmtRange(y.from, y.to)} · ${y.name}\n${split.total} ₾`);
       c.alts.SPLIT = { parts: split.parts.map(p => ({ from: p.from, to: p.to, type: p.type })), typeName: x.name + ' → ' + y.name, total: split.total };
       btns.push([`მთელი ${c.n} ღამე`, 'PICK_SPLIT']);
     }
     if (part) {
-      lines.push(`\n${lines.length}) ${c.n} ღამიდან თავისუფალია ${part.n}:\n${fmtRange(part.from, part.to)} · ${part.name}\n${part.total} ₾, საუზმით`);
+      lines.push(`\n${lines.length}) ${c.n} ღამიდან თავისუფალია ${part.n}:\n${fmtRange(part.from, part.to)} · ${part.name}\n${part.total} ₾`);
       c.alts.PART = { parts: [{ from: part.from, to: part.to }], typeName: part.name, total: part.total };
       btns.push([`${part.n} ღამე`, 'PICK_PART']);
     }
     if (nx) {
-      lines.push(`\n${lines.length}) სრული ${c.n} ღამე სხვა თარიღებში:\n${fmtRange(nx.from, nx.to)} · ${nx.name}\n${nx.total} ₾, საუზმით`);
+      lines.push(`\n${lines.length}) სრული ${c.n} ღამე სხვა თარიღებში:\n${fmtRange(nx.from, nx.to)} · ${nx.name}\n${nx.total} ₾`);
       c.alts.NEXT = { parts: [{ from: nx.from, to: nx.to }], typeName: nx.name, total: nx.total };
       btns.push([fmtRange(nx.from, nx.to), 'PICK_NEXT']);
     }
