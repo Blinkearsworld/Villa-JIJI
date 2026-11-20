@@ -39,10 +39,19 @@ Cloudflare-ზე იგივე კოდი ავტომატურად
 
 1. developers.facebook.com → **Create App** → Business → დაამატეთ **Messenger** (და Instagram-ისთვის **Instagram** პროდუქტი).
 2. Messenger → Settings → დააკავშირეთ ვილა ჯიჯის გვერდი → **Generate token** → ეს არის **META_PAGE_TOKEN**.
-3. App Settings → Basic → **App Secret** → ეს არის **META_APP_SECRET**.
+3. App Settings → Basic → **App Secret** → ეს არის **META_APP_SECRET**. იმავე გვერდზე **App ID** → ეს არის **META_APP_ID** (საიდუმლო არ არის, მაგრამ შეიძლება იმავე ადგილას შეინახოთ).
 4. მოიფიქრეთ ნებისმიერი გრძელი სიტყვა → ეს არის **META_VERIFY_TOKEN**.
-5. Cloudflare-ში **Variables and Secrets**-ში დაამატეთ სამივე, როგორც **Secret** → Retry deployment.
-6. Meta-ში Webhooks: Callback URL `https://<თქვენი-მისამართი>/api/meta`, Verify token იგივე სიტყვა. Subscribe: `messages`, `messaging_postbacks` (Messenger-ზეც და Instagram-ზეც).
+5. Cloudflare-ში **Variables and Secrets**-ში დაამატეთ ოთხივე, როგორც **Secret** → Retry deployment.
+6. Meta-ში Webhooks: Callback URL `https://<თქვენი-მისამართი>/api/meta`, Verify token იგივე სიტყვა. Subscribe: `messages`, `messaging_postbacks`, `message_echoes` (Messenger-ზეც და Instagram-ზეც).
+
+### ადამიანთან საუბარი
+
+სტუმარი ცოცხალ თანამშრომელს სამი გზით მიიღებს. სამივე შემთხვევაში ბოტი ამ სტუმართან 12 საათით ჩუმდება:
+- მენიუში აჭერს ღილაკს **„ადამიანთან საუბარი"**;
+- წერს მაგალითად „ადამიანი", „ოპერატორი", „operator", „человек";
+- თანამშრომელი თავად წერს მას Meta Business Suite-ში (ან Instagram-ის აპში). ბოტი ხედავს, რომ პასუხი ადამიანმა დაწერა, და ჩერდება. ამისთვის საჭიროა `message_echoes` გამოწერა და **META_APP_ID**.
+
+სტუმარს ბოტთან დაბრუნება შეუძლია სიტყვით „მენიუ". თანამშრომლები სტუმრის შეტყობინებებს ჩვეულებრივ ხედავენ Meta Business Suite-ში (კომპიუტერი ან ტელეფონის აპი, შეტყობინებებით).
 
 სანამ Meta აპლიკაციას შეამოწმებს (App Review), ბოტი მხოლოდ აპლიკაციის ადმინებს და ტესტერებს პასუხობს. სტუმრებისთვის ჩასართავად საჭიროა `pages_messaging` და `instagram_manage_messages` უფლებების მოთხოვნა App Review-ში და ბიზნესის ვერიფიკაცია.
 

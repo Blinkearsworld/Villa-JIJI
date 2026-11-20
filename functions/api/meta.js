@@ -1,11 +1,19 @@
 // /api/meta — Facebook Messenger and Instagram Direct webhook.
 // Same scripted flow as the site chatbot (no AI), answering from the same database.
-// Env (set as secrets in Cloudflare): META_VERIFY_TOKEN, META_APP_SECRET, META_PAGE_TOKEN; optional META_GRAPH_VERSION.
-import { loadState, findOffer, nextOffer, partialOffer, splitOffer, gaps, gapDiscount, quote, rateFor, createRequest, addDays, today, fmt, fmtRange, json } from '../_lib/core.js';
+// Env (set as secrets in Cloudflare): META_VERIFY_TOKEN, META_APP_SECRET, META_PAGE_TOKEN; optional META_GRAPH_VERSION,
+// META_APP_ID (lets the bot tell its own messages from replies typed by hotel staff in the inbox).
+// Talking to a person: the "ადამიანთან საუბარი" button, typing e.g. "ადამიანი" / "operator" / "человек",
+// or staff simply replying in Meta Business Suite — in all three cases the bot stays quiet for 12 hours.
+import { ensureDb, loadState, findOffer, nextOffer, partialOffer, splitOffer, gaps, gapDiscount, quote, rateFor, createRequest, addDays, today, fmt, fmtRange, json } from '../_lib/core.js';
 
 const PHONE = '+995 596 90 40 60';
 const MAP = 'https://maps.google.com/?q=41.7318533,43.5301119';
 const HANDOFF_MS = 12 * 3600e3;
+const BOT_TAG = 'jiji-bot';
+const HUMAN = 'ადამიანთან საუბარი';
+const WANTS_HUMAN = /ადამიან|ოპერატორ|ადმინისტრ|მენეჯერ|ცოცხალ|human|operator|person|agent|manager|real person|человек|оператор|менеджер|администратор|живой/i;
+// reception hours in Georgia (UTC+4)
+const openNow = () => { const h = (new Date().getUTCHours() + 4) % 24; return h >= 10 && h < 20; };
 const FAQ = [
   ['საუზმე შედის?', 'დიახ, საუზმე ფასში შედის.'],
   ['ცხოველით შეიძლება?', 'დიახ, შინაური ცხოველებით მოსვლა შეიძლება. წინასწარ გაგვაფრთხილეთ.'],
@@ -47,7 +55,7 @@ async function validSignature(raw, header, secret) {
 
 // ---------- sending ----------
 async function send(env, psid, text, replies) {
-  const message = { text };
+  const message = { text, metadata: BOT_TAG };
   if (replies?.length) message.quick_replies = replies.slice(0, 13).map(([title, payload]) => ({ content_type: 'text', title: title.slice(0, 20), payload }));
   if (env.META_DRY_RUN) { console.log('BOT>', psid, JSON.stringify(message)); return; }
   const v = env.META_GRAPH_VERSION || 'v21.0';
@@ -58,7 +66,7 @@ async function send(env, psid, text, replies) {
   }); } catch (e) { console.log('send failed', e.message); return; }
   if (!res.ok) console.log('send failed', res.status, await res.text());
 }
-const MENU = [['ნომრები და ფასი', 'AVAIL'], ['მოკლე შეთავაზებები', 'DEALS'], ['სად ვართ', 'LOC'], ['ხშირი კითხვები', 'FAQ'], ['დაკავშირება', 'CONTACT']];
+const MENU = [['ნომრები და ფასი', 'AVAIL'], ['მოკლე შეთავაზებები', 'DEALS'], ['სად ვართ', 'LOC'], ['ხშირი კითხვები', 'FAQ'], [HUMAN, 'CONTACT']];
 const BACK = ['მენიუ', 'MENU'];
 
 // ---------- conversation state ----------
@@ -87,8 +95,19 @@ function nextSaturday(weeks = 0) {
 
 // ---------- the flow ----------
 async function handle(env, channel, ev) {
+  await ensureDb(env.DB);
   const psid = ev.sender?.id;
-  if (!psid || ev.message?.is_echo || ev.read || ev.delivery) return;
+  // A message the page sent. If hotel staff typed it in the inbox (not this bot), pause the bot for that guest.
+  if (ev.message?.is_echo) {
+    const guest = ev.recipient?.id;
+    if (guest && staffEcho(env, channel, ev.message)) {
+      const cid = channel + ':' + guest, conv = await getConvo(env.DB, cid);
+      conv.handoff = Date.now() + HANDOFF_MS; conv.step = 'menu';
+      await saveConvo(env.DB, cid, conv);
+    }
+    return;
+  }
+  if (!psid || ev.read || ev.delivery) return;
   const db = env.DB, id = channel + ':' + psid;
   const c = await getConvo(db, id);
   const payload = ev.message?.quick_reply?.payload || ev.postback?.payload || null;
@@ -96,7 +115,7 @@ async function handle(env, channel, ev) {
   const say = (t, r) => send(env, psid, t, r);
 
   // A person from the hotel is answering: stay quiet unless the guest asks for the menu.
-  if (c.handoff && Date.now() < c.handoff && payload !== 'MENU' && !/^მენიუ$/i.test(text)) return;
+  if (c.handoff && Date.now() < c.handoff && payload !== 'MENU' && !/^(მენიუ|menu|меню)$/i.test(text)) return;
   if (c.handoff) delete c.handoff;
 
   const menu = async (greet) => {
@@ -113,7 +132,8 @@ async function handle(env, channel, ev) {
   const offerText = (from, to, o) => `${fmtRange(from, to)} · ${c.n} ღამე · ${c.g} სტუმარი\nთავისუფალია: ${o.name}\n${o.total} ₾, საუზმით`;
   const contact = async (lead) => {
     c.step = 'menu'; c.handoff = Date.now() + HANDOFF_MS;
-    await say((lead || 'ვილა ჯიჯის ადმინისტრაცია აქვე გიპასუხებთ.') + `\nან დაგვირეკეთ: ${PHONE} (ყოველდღე 10:00–20:00)`, [BACK]);
+    const when = openNow() ? 'ვილა ჯიჯის თანამშრომელი აქვე გიპასუხებთ, დაწერეთ თქვენი კითხვა.' : 'ახლა სამუშაო საათები არ არის, ვილა ჯიჯის თანამშრომელი დილით 10:00-დან გიპასუხებთ. დაწერეთ თქვენი კითხვა.';
+    await say((lead ? lead + '\n' : '') + when + `\nან დაგვირეკეთ: ${PHONE}\n\nბოტზე დასაბრუნებლად დაწერეთ: მენიუ`, [BACK]);
   };
   // short free windows (1–3 nights) between bookings, offered with the gap discount
   const maxG = (st, t) => Math.max(0, ...(st.types[t]?.rates || []).map(r => r.guests));
@@ -143,7 +163,7 @@ async function handle(env, channel, ev) {
     const part = partialOffer(st, c.from, c.to, c.g), split = splitOffer(st, c.from, c.to, c.g), nx = nextOffer(st, c.from, c.n, c.g);
     if (!part && !split && !nx) {
       c.step = 'menu';
-      return say('ამ პერიოდში ადგილი აღარ გვაქვს. დაგვიკავშირდით და იქნებ მაინც მოგიძებნოთ გამოსავალი.', [['დაკავშირება', 'CONTACT'], ['სხვა თარიღი', 'AVAIL'], BACK]);
+      return say('ამ პერიოდში ადგილი აღარ გვაქვს. დაგვიკავშირდით და იქნებ მაინც მოგიძებნოთ გამოსავალი.', [[HUMAN, 'CONTACT'], ['სხვა თარიღი', 'AVAIL'], BACK]);
     }
     c.step = 'offer'; c.alts = {};
     const lines = [`${fmtRange(c.from, c.to)} (${c.n} ღამე) მთლიანად თავისუფალი არ გვაქვს, მაგრამ შეგვიძლია შემოგთავაზოთ:`], btns = [];
@@ -163,16 +183,16 @@ async function handle(env, channel, ev) {
       c.alts.NEXT = { parts: [{ from: nx.from, to: nx.to }], typeName: nx.name, total: nx.total };
       btns.push([fmtRange(nx.from, nx.to), 'PICK_NEXT']);
     }
-    return say(lines.join('\n'), [...btns, ['სხვა თარიღი', 'AVAIL'], ['დაკავშირება', 'CONTACT']]);
+    return say(lines.join('\n'), [...btns, ['სხვა თარიღი', 'AVAIL'], [HUMAN, 'CONTACT']]);
   };
 
   try {
-    if (payload === 'MENU' || (c.step === 'new' && !payload) || /^(მენიუ|გამარჯობა|სალამი|hi|hello|menu|start)$/i.test(text)) await menu(c.step === 'new');
+    if (payload === 'MENU' || (c.step === 'new' && !payload && !WANTS_HUMAN.test(text)) || /^(მენიუ|გამარჯობა|სალამი|hi|hello|menu|start)$/i.test(text)) await menu(c.step === 'new');
     else if (payload === 'AVAIL') await askDate();
     else if (payload === 'LOC') { c.step = 'menu'; await say(`თრიალეთის ქუჩა, ბაკურიანი\nკოხტას საბაგირო 300 მეტრშია, დიდველის საბაგირო 2,9 კმ-ში.\n${MAP}`, [['ნომრები და ფასი', 'AVAIL'], BACK]); }
     else if (payload === 'FAQ') { c.step = 'menu'; await say('აირჩიეთ კითხვა:', FAQ.map(([q], i) => [q, 'FAQ_' + i]).concat([BACK])); }
     else if (payload?.startsWith('FAQ_')) await say(FAQ[+payload.slice(4)]?.[1] || '—', [['სხვა კითხვა', 'FAQ'], ['ნომრები და ფასი', 'AVAIL'], BACK]);
-    else if (payload === 'CONTACT') await contact();
+    else if (payload === 'CONTACT' || (!payload && WANTS_HUMAN.test(text) && !['name', 'phone'].includes(c.step))) await contact();
     else if (payload === 'DEALS') await deals();
     else if (payload?.startsWith('GAP_') && c.gaps?.[+payload.slice(4)]) {
       const st = await loadState(db), g = c.gaps[+payload.slice(4)], cap = Math.min(6, maxG(st, g.type));
@@ -213,10 +233,18 @@ async function handle(env, channel, ev) {
     }
     else {
       c.misses = (c.misses || 0) + 1;
-      if (c.misses >= 2) { c.misses = 0; await contact('ვერ გავიგე. ვილა ჯიჯის ადმინისტრაცია აქვე გიპასუხებთ.'); }
+      if (c.misses >= 2) { c.misses = 0; await contact('ვერ გავიგე.'); }
       else await say('ვერ გავიგე. აირჩიეთ ერთ-ერთი:', MENU);
     }
   } finally {
     await saveConvo(db, id, c);
   }
+}
+
+// Was this echo typed by a person in the inbox? The bot tags its own messages; with META_APP_ID set,
+// anything sent by another app (Business Suite, Instagram app) counts as staff.
+function staffEcho(env, channel, m) {
+  if (m.metadata === BOT_TAG) return false;
+  if (env.META_APP_ID) return String(m.app_id || '') !== String(env.META_APP_ID);
+  return channel === 'fb';
 }
