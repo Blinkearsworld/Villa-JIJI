@@ -43,6 +43,8 @@ const SCHEMA = [
   `CREATE TABLE IF NOT EXISTS bookings (id TEXT PRIMARY KEY, room TEXT, type TEXT, date_from TEXT, date_to TEXT,
      guests INTEGER, name TEXT, phone TEXT, status TEXT, source TEXT, created TEXT, price INTEGER, note TEXT)`,
   `CREATE INDEX IF NOT EXISTS bookings_dates ON bookings (status, date_from, date_to)`,
+  `CREATE TABLE IF NOT EXISTS payments (id TEXT PRIMARY KEY, booking TEXT, amount INTEGER, method TEXT, date TEXT, created TEXT)`,
+  `CREATE INDEX IF NOT EXISTS payments_booking ON payments (booking)`,
   `CREATE TABLE IF NOT EXISTS convos (id TEXT PRIMARY KEY, state TEXT, updated TEXT)`,
 ];
 let ready = false;
@@ -69,13 +71,14 @@ const rowToBooking = r => ({ id: r.id, room: r.room, type: r.type, from: r.date_
 // Everything needed to answer availability questions. `full` adds guest details (admin only).
 export async function loadState(db, { full = false } = {}) {
   await ensureDb(db);
-  const [types, rooms, settings, bookings] = await Promise.all([
+  const [types, rooms, settings, bookings, payments] = await Promise.all([
     db.prepare('SELECT * FROM types ORDER BY sort').all(),
     db.prepare('SELECT * FROM rooms ORDER BY id').all(),
     db.prepare('SELECT * FROM settings').all(),
     full
       ? db.prepare("SELECT * FROM bookings WHERE status != 'declined' OR created > ? ORDER BY created DESC").bind(addDays(today(), -60)).all()
       : db.prepare("SELECT id, room, type, date_from, date_to FROM bookings WHERE status = 'confirmed' AND date_to >= ?").bind(today()).all(),
+    full ? db.prepare('SELECT * FROM payments ORDER BY date').all() : null,
   ]);
   const T = {};
   for (const t of types.results) {
@@ -90,6 +93,7 @@ export async function loadState(db, { full = false } = {}) {
     settings: S,
     bookings: bookings.results.map(r => full ? rowToBooking(r)
       : { id: r.id, room: r.room, type: r.type, from: r.date_from, to: r.date_to, status: 'confirmed' }),
+    ...(full ? { payments: payments.results } : {}),
   };
 }
 

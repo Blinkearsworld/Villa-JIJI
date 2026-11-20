@@ -45,7 +45,7 @@ window.JIJI = (() => {
   };
 
   // ---------- storage ----------
-  let state, mode = 'demo';
+  let state, mode = 'demo', needPayments = false;
   // Which season the site opens in. 'auto' follows the winter date range (MM-DD, may wrap the year).
   const DEFAULT_SETTINGS = { seasonMode: 'auto', winterFrom: '11-15', winterTo: '03-31', gapDiscount: '10' };
   // capacity of a type = its largest guest version
@@ -78,12 +78,14 @@ window.JIJI = (() => {
         b('301', 8, 3, 'თამარ ჯ.', '+995 555 40 50 60', 4, 'confirmed', 'site'),
         pending('family', 3, 3, 'ლევან ქ.', '+995 555 12 12 12', 4, 'chat'),
         pending('budget', 9, 2, 'Mark T.', '+44 7700 900123', 2, 'site')
-      ]
+      ],
+      payments: []
     };
   }
   function load() {
     try { state = JSON.parse(localStorage.getItem(KEY)); } catch (e) { state = null; }
-    if (!state || !state.bookings) { state = seed(); save(); return; }
+    if (!state || !state.bookings) { state = seed(); needPayments = true; save(); return; }
+    if (!Array.isArray(state.payments)) state.payments = [];
     for (const k in state.types) syncCap(k);
     state.settings = { ...DEFAULT_SETTINGS, ...(state.settings || {}) };
     // add room types introduced after this browser first saved its data
@@ -92,8 +94,15 @@ window.JIJI = (() => {
     for (const k in DEFAULT_TYPES) if (!state.types[k]) { state.types[k] = JSON.parse(JSON.stringify(DEFAULT_TYPES[k])); syncCap(k); added = true; }
     if (added) save();
   }
+  // a few sample payments so the money tab is not empty in the demo
+  function demoPayments() {
+    const c = state.bookings.filter(b => b.status === 'confirmed'), t = today();
+    c.forEach(b => { b.price = quote(b.type, b.from, b.to, b.guests); });
+    const pay = (b, part, method, ago) => b && state.payments.push({ id: uid(), booking: b.id, amount: Math.round(b.price * part), method, date: addDays(t, -ago), created: new Date().toISOString() });
+    pay(c[0], 1, 'cash', 0); pay(c[1], .3, 'transfer', 3); pay(c[2], 1, 'card', 1); pay(c[3], .5, 'transfer', 6); pay(c[5], .2, 'card', 12);
+  }
   function save() { if (mode === 'api') return; try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* storage unavailable: demo keeps working in memory */ } }
-  function reset() { state = seed(); save(); }
+  function reset() { state = seed(); demoPayments(); save(); }
   load();
 
   // ---------- availability ----------
@@ -207,14 +216,16 @@ window.JIJI = (() => {
     const r = state.bookings.find(x => x.id === id); if (!r) return { ok: false, msg: 'ჯავშანი ვერ მოიძებნა' };
     const room = roomId || bestRoom(r.type, r.from, r.to);
     if (!room || !roomFree(room, r.from, r.to, r.id)) return { ok: false, msg: 'ამ თარიღებზე ' + state.types[r.type].name + ' ნომერი თავისუფალი აღარ არის' };
-    r.room = room; r.status = 'confirmed'; save(); post('api/admin/action', { op: 'confirm', id, room }); return { ok: true, room };
+    r.room = room; r.status = 'confirmed'; if (r.price == null) r.price = quote(r.type, r.from, r.to, r.guests);
+    save(); post('api/admin/action', { op: 'confirm', id, room }); return { ok: true, room };
   }
   function decline(id) { const r = state.bookings.find(x => x.id === id); if (r) { r.status = 'declined'; save(); post('api/admin/action', { op: 'decline', id }); } }
-  function addManual({ room, from, to, name, phone, guests }) {
+  function addManual({ room, from, to, name, phone, guests, price }) {
     if (!roomFree(room, from, to)) return { ok: false, msg: 'ნომერი ' + room + ' ამ თარიღებზე დაკავებულია' };
     const type = ROOMS.find(r => r.id === room).type;
-    state.bookings.push({ id: uid(), room, type, from, to, name, phone, guests, status: 'confirmed', source: 'admin', created: new Date().toISOString() });
-    save(); post('api/admin/action', { op: 'add', room, from, to, name, phone, guests }); return { ok: true };
+    const p = price === '' || price == null ? quote(type, from, to, guests) : Math.max(0, Math.round(+price || 0));
+    state.bookings.push({ id: uid(), room, type, from, to, name, phone, guests, price: p, status: 'confirmed', source: 'admin', created: new Date().toISOString() });
+    save(); post('api/admin/action', { op: 'add', room, from, to, name, phone, guests, price: p }); return { ok: true };
   }
   const pushRates = type => post('api/admin/action', { op: 'rates', type, rates: state.types[type].rates });
   function setRate(type, i, field, value) {
@@ -237,7 +248,31 @@ window.JIJI = (() => {
     const inWinter = a <= b ? (md >= a && md <= b) : (md >= a || md <= b);
     return inWinter ? 'winter' : 'summer';
   }
-  function remove(id) { state.bookings = state.bookings.filter(x => x.id !== id); save(); post('api/admin/action', { op: 'remove', id }); }
+  function remove(id) { state.bookings = state.bookings.filter(x => x.id !== id); state.payments = state.payments.filter(x => x.booking !== id); save(); post('api/admin/action', { op: 'remove', id }); }
+
+  // ---------- money: agreed price, payments, what is left ----------
+  const METHODS = { card: 'ბარათი', transfer: 'პირადზე ჩარიცხვა', cash: 'ქეში' };
+  const priceOf = b => b.price ?? quote(b.type, b.from, b.to, b.guests);
+  const paymentsOf = id => state.payments.filter(x => x.booking === id).sort((a, b) => a.date < b.date ? -1 : 1);
+  const paidOf = id => paymentsOf(id).reduce((s, x) => s + x.amount, 0);
+  function payState(b) {
+    const price = priceOf(b), paid = paidOf(b.id), left = Math.max(0, price - paid);
+    return { price, paid, left, status: paid <= 0 ? 'none' : left > 0 ? 'part' : 'full' };
+  }
+  function setPrice(id, price) {
+    const b = state.bookings.find(x => x.id === id); if (!b) return;
+    b.price = Math.max(0, Math.round(+price || 0)); save(); post('api/admin/action', { op: 'price', id, price: b.price });
+  }
+  function addPayment({ booking, amount, method, date }) {
+    amount = Math.round(+amount || 0);
+    if (!state.bookings.some(x => x.id === booking)) return { ok: false, msg: 'ჯავშანი ვერ მოიძებნა' };
+    if (!amount) return { ok: false, msg: 'ჩაწერეთ თანხა' };
+    if (!METHODS[method]) return { ok: false, msg: 'აირჩიეთ გადახდის ხერხი' };
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date || '')) date = today();
+    const p = { id: uid(), booking, amount, method, date, created: new Date().toISOString() };
+    state.payments.push(p); save(); post('api/admin/action', { op: 'pay', ...p }); return { ok: true };
+  }
+  function removePayment(pid) { state.payments = state.payments.filter(x => x.id !== pid); save(); post('api/admin/action', { op: 'unpay', id: pid }); }
 
   // ---------- server (Cloudflare) ----------
   const isAdmin = /admin(\.html)?$/.test(location.pathname);
@@ -245,7 +280,7 @@ window.JIJI = (() => {
   const emit = () => listeners.forEach(f => { try { f(); } catch (e) { console.error(e); } });
   function applyServer(data) {
     for (const k in data.types) data.types[k].cap = data.types[k].cap ?? (data.types[k].rates.slice(-1)[0]?.guests || 0);
-    state = { types: data.types, settings: data.settings, bookings: data.bookings };
+    state = { types: data.types, settings: data.settings, bookings: data.bookings, payments: data.payments || [] };
     ROOMS.length = 0; data.rooms.forEach(r => ROOMS.push(r));
   }
   async function refresh() {
@@ -280,9 +315,11 @@ window.JIJI = (() => {
   const onChange = f => listeners.push(f);
   const onError = f => errorListeners.push(f);
 
+  if (needPayments) { demoPayments(); save(); }
   return {
     ROOMS, SEASONS, get settings() { return state.settings; }, setSetting, siteSeason, get types() { return state.types; }, get bookings() { return state.bookings; },
     today, addDays, nights, fmt, fmtRange, weekday, seasonOf, quote, rateFor, fromPrice, findOffer, nextOffer, partialOffer, splitOffer, gaps, gapDiscount, bestRoom, roomFree,
+    get payments() { return state.payments; }, METHODS, priceOf, paymentsOf, paidOf, payState, setPrice, addPayment, removePayment,
     createRequest, confirm, decline, addManual, setRate, addRate, removeRate, remove, reset, onChange, onError, reload: load,
     ready, get mode() { return mode; }
   };
