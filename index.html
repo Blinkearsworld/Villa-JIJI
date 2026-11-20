@@ -127,8 +127,9 @@ body.at-hero .jc-fab{opacity:0;pointer-events:none;transform:translateY(12px)}
 .ny .act{margin-top:30px;display:flex;flex-wrap:wrap;gap:12px}
 .vbox{position:relative;border-radius:10px;overflow:hidden;aspect-ratio:16/9;background:#000;box-shadow:0 30px 80px rgba(0,0,0,.45)}
 .vbox video,.vbox img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.vplay{position:absolute;inset:0;display:grid;place-items:center;border:0;background:linear-gradient(180deg,rgba(0,0,0,0) 40%,rgba(5,10,18,.55));cursor:pointer;color:#0b1422}
-.vplay span{display:flex;align-items:center;gap:12px;min-height:60px;padding:0 26px 0 20px;border-radius:999px;background:#f3c27a;font:500 16px "Noto Sans Georgian",sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.4);transition:transform .25s}
+.vplay{position:absolute;inset:0;display:grid;place-items:center;border:0;background:transparent;cursor:pointer;color:#fff}
+.vplay span{display:flex;align-items:center;gap:12px;min-height:60px;padding:0 26px 0 20px;border-radius:999px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.55);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);font:500 16px "Noto Sans Georgian",sans-serif;text-shadow:0 1px 6px rgba(0,0,0,.5);transition:transform .25s,background .25s}
+.vplay:hover span{background:rgba(255,255,255,.24)}
 .vplay:hover span{transform:scale(1.05)}
 .vbox .len{position:absolute;right:14px;bottom:12px;font-size:13px;color:#fff;background:rgba(0,0,0,.55);padding:3px 10px;border-radius:999px;pointer-events:none}
 .ny .small{margin-top:14px}
@@ -297,7 +298,7 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 </div>
 <!-- Demo: video hosted with the site and loaded only on tap. Later: replace the <video> with a YouTube embed (see README). -->
 <div class="vbox" id="nyBox">
-<img src="video/new-year-poster.jpg" alt="ახალი წლის სუფრა ბუხართან, სტუმრები ხელს გვიქნევენ" loading="lazy">
+<img src="video/new-year-poster.jpg" alt="ვილა ჯიჯი ახალი წლის ღამეს, სტუმრები აივნებზე სანთლებით" loading="lazy">
 <button class="vplay" type="button" id="nyPlay" aria-label="ვიდეოს ჩართვა"><span><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>ვიდეოს ნახვა</span></button>
 <span class="len">1:08</span>
 </div>
