@@ -46,6 +46,8 @@ window.JIJI = (() => {
 
   // ---------- storage ----------
   let state;
+  // Which season the site opens in. 'auto' follows the winter date range (MM-DD, may wrap the year).
+  const DEFAULT_SETTINGS = { seasonMode: 'auto', winterFrom: '11-15', winterTo: '03-31' };
   // capacity of a type = its largest guest version
   function syncCap(k) {
     const t = state.types[k];
@@ -65,6 +67,7 @@ window.JIJI = (() => {
     const types = JSON.parse(JSON.stringify(DEFAULT_TYPES));
     for (const k in types) types[k].cap = types[k].rates[types[k].rates.length - 1].guests;
     return {
+      settings: { ...DEFAULT_SETTINGS },
       types,
       bookings: [
         b('101', 1, 3, 'ნინო ბ.', '+995 555 10 20 30', 2, 'confirmed', 'admin'),
@@ -82,6 +85,7 @@ window.JIJI = (() => {
     try { state = JSON.parse(localStorage.getItem(KEY)); } catch (e) { state = null; }
     if (!state || !state.bookings) { state = seed(); save(); return; }
     for (const k in state.types) syncCap(k);
+    if (!state.settings) { state.settings = { ...DEFAULT_SETTINGS }; save(); }
     // add room types introduced after this browser first saved its data
     let added = false;
     for (const k in DEFAULT_TYPES) if (!state.types[k]) { state.types[k] = JSON.parse(JSON.stringify(DEFAULT_TYPES[k])); syncCap(k); added = true; }
@@ -161,6 +165,14 @@ window.JIJI = (() => {
     syncCap(type); save();
   }
   function removeRate(type, i) { state.types[type].rates.splice(i, 1); syncCap(type); save(); }
+  function setSetting(k, v) { state.settings[k] = v; save(); }
+  function siteSeason(day) {
+    const st = state.settings || DEFAULT_SETTINGS;
+    if (st.seasonMode === 'winter' || st.seasonMode === 'summer') return st.seasonMode;
+    const md = (day || today()).slice(5), a = st.winterFrom, b = st.winterTo;
+    const inWinter = a <= b ? (md >= a && md <= b) : (md >= a || md <= b);
+    return inWinter ? 'winter' : 'summer';
+  }
   function remove(id) { state.bookings = state.bookings.filter(x => x.id !== id); save(); }
 
   // Keep every open tab (site, admin) in sync.
@@ -169,7 +181,7 @@ window.JIJI = (() => {
   const onChange = f => listeners.push(f);
 
   return {
-    ROOMS, SEASONS, get types() { return state.types; }, get bookings() { return state.bookings; },
+    ROOMS, SEASONS, get settings() { return state.settings; }, setSetting, siteSeason, get types() { return state.types; }, get bookings() { return state.bookings; },
     today, addDays, nights, fmt, fmtRange, weekday, seasonOf, quote, rateFor, fromPrice, findOffer, nextOffer, roomFree,
     createRequest, confirm, decline, addManual, setRate, addRate, removeRate, remove, reset, onChange, reload: load
   };

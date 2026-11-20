@@ -18,7 +18,7 @@
 :root{color-scheme:dark;--night:#0b1422;--deep:#122038;--snow:#eef2f6;--ink:#0b1422;--lamp:#f3c27a;--mist:#a9b6c8;--line:rgba(238,242,246,.16)}
 *{box-sizing:border-box;min-width:0}
 html{scroll-behavior:smooth;scroll-padding-top:72px}
-body{margin:0;background:var(--night);color:var(--snow);font:16px/1.65 "Noto Sans Georgian",system-ui,sans-serif;overflow-x:clip}
+body{margin:0;transition:background-color .6s;background:var(--night);color:var(--snow);font:16px/1.65 "Noto Sans Georgian",system-ui,sans-serif;overflow-x:clip}
 img{max-width:100%;display:block}
 a{color:inherit}
 h1,h2,h3{margin:0;font-weight:400;text-wrap:balance}
@@ -31,9 +31,22 @@ p{margin:0}
 .btn.ghost:hover{background:rgba(238,242,246,.12)}
 .btn:focus-visible,a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--lamp);outline-offset:3px}
 
+/* season theme: winter = night blue, summer = pine green with warm sun */
+:root{--hero:#07101c;--bar:rgba(11,20,34,.82);--ny2:#0f1b30}
+:root[data-season=summer]{--night:#12221a;--deep:#193024;--mist:#b4c5b6;--hero:#0d1a13;--bar:rgba(18,34,26,.84);--ny2:#1a2e22}
+.hero,.book,#near,.ny,.top.solid,.fire,.strip{transition:background-color .6s}
+.sw{display:flex;padding:3px;border-radius:999px;background:rgba(238,242,246,.12);border:1px solid rgba(238,242,246,.22)}
+.sw button{display:flex;align-items:center;gap:6px;min-height:38px;padding:0 12px;border:0;border-radius:999px;background:transparent;color:var(--snow);font:500 13px "Noto Sans Georgian",sans-serif;cursor:pointer}
+.sw button[aria-pressed=true]{background:var(--lamp);color:#0b1422}
+.sw button:focus-visible{outline:2px solid var(--lamp);outline-offset:2px}
+.swap{transition:opacity .45s}
+.swap.fade{opacity:0}
+[data-season=summer] .only-w{display:none}
+[data-season=winter] .only-s{display:none}
+@media(max-width:600px){.sw button span{display:none}.sw button{padding:0 10px}}
 /* header */
 .top{position:fixed;inset:0 0 auto;z-index:20;transition:background .35s,backdrop-filter .35s}
-.top.solid{background:rgba(11,20,34,.82);backdrop-filter:blur(12px)}
+.top.solid{background:var(--bar);backdrop-filter:blur(12px)}
 .top .wrap{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px;min-height:72px}
 .nav{display:flex;gap:26px;font-size:14px}
 .nav a{text-decoration:none;opacity:.9}
@@ -45,7 +58,7 @@ p{margin:0}
 .lang b{color:var(--snow);font-weight:500}
 
 /* hero */
-.hero{position:relative;height:min(100svh,980px);min-height:620px;overflow:hidden;background:#07101c}
+.hero{position:relative;height:min(100svh,980px);min-height:620px;overflow:hidden;background:var(--hero)}
 .hero img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 42%;transform:scale(1.08);animation:drift 26s ease-out forwards}
 @keyframes drift{to{transform:scale(1)}}
 .hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,16,28,.55) 0,rgba(7,16,28,0) 26%,rgba(7,16,28,0) 50%,rgba(7,16,28,.85) 100%)}
@@ -95,7 +108,7 @@ p{margin:0}
 .strip figcaption{position:absolute;left:16px;bottom:14px;font:italic 500 22px Cormorant,serif;text-shadow:0 1px 10px rgba(0,0,0,.6)}
 
 /* new year video */
-.ny{padding:clamp(80px,10vw,140px) 0;background:linear-gradient(180deg,var(--night),#0f1b30)}
+.ny{padding:clamp(80px,10vw,140px) 0;background:linear-gradient(180deg,var(--night),var(--ny2))}
 .ny .wrap{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.7fr);gap:clamp(28px,5vw,72px);align-items:center}
 .ny h2{font:300 clamp(32px,3.6vw,52px)/1.15 "Noto Serif Georgian",serif;letter-spacing:-.01em}
 .ny p.lead{color:#cdd6e2;margin-top:18px;max-width:440px}
@@ -214,7 +227,7 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 <nav class="nav" aria-label="მენიუ">
 <a href="#seasons">სეზონები</a>
 <a href="#fire">ბუხრის ოთახი</a>
-<a href="#newyear">ახალი წელი</a>
+<a class="only-w" href="#newyear">ახალი წელი</a>
 <a href="#spaces">სივრცეები</a>
 <a href="#grounds">ეზო</a>
 <a href="#near">ახლოს</a>
@@ -225,6 +238,7 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 <span>Villa JIJI</span>
 </a>
 <div class="right">
+<div class="sw" role="group" aria-label="სეზონი"><button type="button" data-set="winter" aria-pressed="true"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M12 2v20M3.3 7l17.4 10M3.3 17 20.7 7M9 4l3 2 3-2M9 20l3-2 3 2"/></svg><span>ზამთარი</span></button><button type="button" data-set="summer" aria-pressed="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1"/></svg><span>ზაფხული</span></button></div>
 <div class="lang" aria-label="ენა"><b>KA</b><span>EN</span><span>RU</span></div>
 <a class="btn lamp" href="#book">დაჯავშნა</a>
 </div>
@@ -232,17 +246,17 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 </header>
 
 <main>
-<section class="hero" id="hero" aria-label="Villa JIJI ზამთრის ღამეს">
-<img src="img/winter-night.jpg" alt="Villa JIJI თოვლიან ღამეს, ანთებული გირლიანდით">
+<section class="hero" id="hero" aria-label="Villa JIJI">
+<img class="swap" src="img/winter-night.jpg" alt="Villa JIJI თოვლიან ღამეს, ანთებული გირლიანდით" data-w="img/winter-night.jpg|Villa JIJI თოვლიან ღამეს, ანთებული გირლიანდით" data-s="img/facade-front.jpg|Villa JIJI ზაფხულის საღამოს, ჭიშკრიდან">
 <canvas id="snow" aria-hidden="true"></canvas>
 <div class="cap">
 <div class="wrap">
 <div>
 <h1 class="name">Villa JIJI</h1>
-<p class="tag">თოვლი გარეთ, ცეცხლი შიგნით</p>
+<p class="tag" data-w="თოვლი გარეთ, ცეცხლი შიგნით" data-s="მზე ეზოში, მთა აივნიდან">თოვლი გარეთ, ცეცხლი შიგნით</p>
 </div>
 <div class="side">
-<p>ოჯახური შალე ბაკურიანში, კოხტას საბაგიროდან 300 მეტრში. ათი ნომერი, ბუხარი და ბაღი აუზით.</p>
+<p data-w="ოჯახური შალე ბაკურიანში, კოხტას საბაგიროდან 300 მეტრში. ათი ნომერი, ბუხარი და ახალი წლის სუფრა." data-s="ოჯახური შალე ბაკურიანში. ათი ნომერი, აუზი მზიან ეზოში, ბატუტი ბავშვებისთვის და ტყე ფეხის ნაბიჯზე.">ოჯახური შალე ბაკურიანში, კოხტას საბაგიროდან 300 მეტრში. ათი ნომერი, ბუხარი და ახალი წლის სუფრა.</p>
 <div><a class="btn ghost" href="#book">თარიღის შერჩევა</a></div>
 </div>
 </div>
@@ -251,7 +265,7 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 
 <section class="state" aria-label="ვილა ჯიჯის შესახებ">
 <div class="wrap">
-<img src="img/birch.jpg" alt="ვილა ჯიჯის ფასადი არყის ფოთლებს მიღმა" loading="lazy">
+<img class="swap" src="img/birch.jpg" alt="ვილა ჯიჯის ფასადი არყის ფოთლებს მიღმა" loading="lazy" data-w="img/winter/facade-lit.jpg|ვილა ჯიჯი ღამით, განათებული აივნებით" data-s="img/birch.jpg|ვილა ჯიჯის ფასადი არყის ფოთლებს მიღმა">
 <div>
 <p class="big">ქვისა და ხისგან ნაშენი სამსართულიანი სახლი თრიალეთის ქუჩაზე. დილით ფანჯრიდან დიდველი ჩანს, საღამოს ეზოში გირლიანდები ინთება, ლაუნჯში კი ბუხარი.</p>
 <div class="facts">
@@ -277,7 +291,7 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 <p class="hint">აირჩიეთ სეზონი</p>
 </section>
 
-<section class="ny" id="newyear" aria-label="ახალი წელი ვილა ჯიჯიში">
+<section class="ny only-w" id="newyear" aria-label="ახალი წელი ვილა ჯიჯიში">
 <div class="wrap">
 <div>
 <h2>ახალი წელი ვილა ჯიჯიში</h2>
@@ -311,10 +325,10 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 
 <section aria-label="ფოტოები">
 <div class="strip" tabindex="0" aria-label="ფოტოები, გადაახვიეთ გვერდზე">
-<figure><img src="img/facade-front.jpg" alt="ფასადი ჭიშკრიდან, საღამოს მზეზე" loading="lazy"><figcaption>ჭიშკარი</figcaption></figure>
-<figure><img src="img/garden.jpg" alt="ეზო სკამებით, საქანელით და აუზით" loading="lazy"><figcaption>ეზო</figcaption></figure>
-<figure><img src="img/pool-key.jpg" alt="აუზი ვილა ჯიჯის წინ" loading="lazy"><figcaption>აუზი</figcaption></figure>
-<figure><img src="img/lounge-wide.jpg" alt="ლაუნჯი გიტარით და ბარით" loading="lazy"><figcaption>ლაუნჯი</figcaption></figure>
+<figure><img class="swap" src="img/winter/fireworks.jpg" alt="ფეიერვერკი ვილა ჯიჯის თავზე" loading="lazy" data-w="img/winter/fireworks.jpg|ფეიერვერკი ვილა ჯიჯის თავზე" data-s="img/facade-front.jpg|ფასადი ჭიშკრიდან, საღამოს მზეზე"><figcaption data-w="ფეიერვერკი" data-s="ჭიშკარი">ფეიერვერკი</figcaption></figure>
+<figure><img class="swap" src="img/winter/bonfire.jpg" alt="კოცონი თოვლიან ეზოში" loading="lazy" data-w="img/winter/bonfire.jpg|კოცონი თოვლიან ეზოში" data-s="img/garden.jpg|ეზო სკამებით, საქანელით და აუზით"><figcaption data-w="კოცონი" data-s="ეზო">კოცონი</figcaption></figure>
+<figure><img class="swap" src="img/winter/hall.jpg" alt="მორთული დარბაზი ნაძვის ხით და ბუხრით" loading="lazy" data-w="img/winter/hall.jpg|მორთული დარბაზი ნაძვის ხით და ბუხრით" data-s="img/pool-key.jpg|აუზი ვილა ჯიჯის წინ"><figcaption data-w="დარბაზი" data-s="აუზი">დარბაზი</figcaption></figure>
+<figure><img class="swap" src="img/winter/snowman.jpg" alt="თოვლის კაცი ვილა ჯიჯის წინ" loading="lazy" data-w="img/winter/snowman.jpg|თოვლის კაცი ვილა ჯიჯის წინ" data-s="img/lounge-wide.jpg|ლაუნჯი გიტარით და ბარით"><figcaption data-w="თოვლის კაცი" data-s="ლაუნჯი">თოვლის კაცი</figcaption></figure>
 </div>
 </section>
 
@@ -334,10 +348,10 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 <section class="sec" id="grounds" aria-label="ეზო" style="padding-top:0">
 <div class="wrap">
 <div class="where">
-<img src="img/garden.jpg" alt="ვილა ჯიჯის ეზო: გაზონი, სკამები, საქანელა და აუზი" loading="lazy">
+<img class="swap" src="img/garden.jpg" alt="ვილა ჯიჯის ეზო: გაზონი, სკამები, საქანელა და აუზი" loading="lazy" data-w="img/winter/bonfire.jpg|კოცონი თოვლიან ეზოში, სტუმრები ერთად" data-s="img/garden.jpg|ვილა ჯიჯის ეზო: გაზონი, სკამები, საქანელა და აუზი">
 <div>
 <h2>ეზო</h2>
-<p class="lead">ხის ღობით შემოსაზღვრული საკუთარი ეზო ტყიანი მთის ხედით. ბავშვები უსაფრთხოდ თამაშობენ, დიდები ქოლგის ქვეშ ან შეზლონგზე ისვენებენ.</p>
+<p class="lead" data-w="ზამთარში ეზოს თოვლი ფარავს: ბავშვები თოვლის კაცს აკეთებენ, საღამოს კი კოცონს ვანთებთ და ახალ წელს ფეიერვერკით ვხვდებით." data-s="ხის ღობით შემოსაზღვრული საკუთარი ეზო ტყიანი მთის ხედით. ბავშვები უსაფრთხოდ თამაშობენ, დიდები ქოლგის ქვეშ ან შეზლონგზე ისვენებენ.">ხის ღობით შემოსაზღვრული საკუთარი ეზო ტყიანი მთის ხედით. ბავშვები უსაფრთხოდ თამაშობენ, დიდები ქოლგის ქვეშ ან შეზლონგზე ისვენებენ.</p>
 <ul class="ticks">
 <li>მწვანე გაზონი, თუჯის სკამები და ხის შეზლონგები</li>
 <li>საბავშვო მოედანი: სასრიალო, საქანელები და ბატუტი</li>
@@ -349,11 +363,11 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 </div>
 </div>
 <div class="yard">
-<figure><img src="img/yard/pool-terrace.jpg" alt="ქვის ტერასა აუზით და შეზლონგებით" loading="lazy"><figcaption>ტერასა და აუზი</figcaption></figure>
-<figure><img src="img/yard/trampoline.jpg" alt="ბატუტი და საბავშვო მოედანი" loading="lazy"><figcaption>ბატუტი</figcaption></figure>
-<figure><img src="img/yard/playground.jpg" alt="სასრიალო და საქანელები" loading="lazy"><figcaption>საბავშვო მოედანი</figcaption></figure>
-<figure><img src="img/yard/terrace-umbrella.jpg" alt="მაგიდა ქოლგის ქვეშ და ფანჩატური" loading="lazy"><figcaption>ქოლგა და ფანჩატური</figcaption></figure>
-<figure><img src="img/yard/from-above.jpg" alt="ეზო აივნიდან: სკამები, საქანელა და ქვის ტერასა" loading="lazy"><figcaption>ეზო აივნიდან</figcaption></figure>
+<figure><img class="swap" src="img/yard/pool-terrace.jpg" alt="ქვის ტერასა აუზით და შეზლონგებით" loading="lazy" data-w="img/winter/fireworks.jpg|ფეიერვერკი ეზოში" data-s="img/yard/pool-terrace.jpg|ქვის ტერასა აუზით და შეზლონგებით"><figcaption data-w="ფეიერვერკი" data-s="ტერასა და აუზი">ტერასა და აუზი</figcaption></figure>
+<figure><img class="swap" src="img/yard/trampoline.jpg" alt="ბატუტი და საბავშვო მოედანი" loading="lazy" data-w="img/winter/snowman.jpg|თოვლის კაცი" data-s="img/yard/trampoline.jpg|ბატუტი და საბავშვო მოედანი"><figcaption data-w="თოვლის კაცი" data-s="ბატუტი">ბატუტი</figcaption></figure>
+<figure><img class="swap" src="img/yard/playground.jpg" alt="სასრიალო და საქანელები" loading="lazy" data-w="img/winter/facade-lit.jpg|განათებული აივნები" data-s="img/yard/playground.jpg|სასრიალო და საქანელები"><figcaption data-w="აივნები ღამით" data-s="საბავშვო მოედანი">საბავშვო მოედანი</figcaption></figure>
+<figure><img class="swap" src="img/yard/terrace-umbrella.jpg" alt="მაგიდა ქოლგის ქვეშ და ფანჩატური" loading="lazy" data-w="img/winter/table.jpg|ახალი წლის სუფრა" data-s="img/yard/terrace-umbrella.jpg|მაგიდა ქოლგის ქვეშ და ფანჩატური"><figcaption data-w="სუფრა" data-s="ქოლგა და ფანჩატური">ქოლგა და ფანჩატური</figcaption></figure>
+<figure><img class="swap" src="img/yard/from-above.jpg" alt="ეზო აივნიდან: სკამები, საქანელა და ქვის ტერასა" loading="lazy" data-w="img/winter/hall.jpg|მორთული დარბაზი" data-s="img/yard/from-above.jpg|ეზო აივნიდან: სკამები, საქანელა და ქვის ტერასა"><figcaption data-w="დარბაზი" data-s="ეზო აივნიდან">ეზო აივნიდან</figcaption></figure>
 </div>
 </div>
 </section>
@@ -446,6 +460,22 @@ addEventListener('scroll',onScroll,{passive:true});onScroll();
 const panes=[...document.querySelectorAll('.pane')];
 panes.forEach(p=>p.addEventListener('click',()=>{panes.forEach(q=>{q.classList.toggle('on',q===p);q.setAttribute('aria-expanded',q===p)})}));
 
+/* season: visitor choice > admin setting (auto by dates or fixed) */
+const root=document.documentElement;
+let season=(()=>{try{const v=localStorage.getItem('jiji-season');if(v==='winter'||v==='summer')return v}catch(e){}return JIJI.siteSeason()})();
+const applySeason=(sz,animate)=>{
+ season=sz;root.dataset.season=sz;
+ document.querySelectorAll('.sw [data-set]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.set===sz));
+ document.querySelectorAll('[data-w][data-s]').forEach(el=>{
+  const v=el.dataset[sz==='winter'?'w':'s'];
+  if(el.tagName==='IMG'){const [src,alt]=v.split('|');if(el.getAttribute('src')===src)return;
+   const go=()=>{el.src=src;if(alt)el.alt=alt;el.classList.remove('fade')};
+   if(animate){el.classList.add('fade');setTimeout(go,300)}else go()}
+  else el.textContent=v});
+ panes.forEach((q,i)=>{const on=(i===0)===(sz==='winter');q.classList.toggle('on',on);q.setAttribute('aria-expanded',on)});
+ if(window.setFlakes)setFlakes();
+};
+document.querySelector('.sw').addEventListener('click',e=>{const b=e.target.closest('[data-set]');if(!b)return;try{localStorage.setItem('jiji-season',b.dataset.set)}catch(e){}applySeason(b.dataset.set,true)});
 const lit=document.getElementById('lit');
 lit.addEventListener('pointermove',e=>{const r=lit.getBoundingClientRect();lit.style.setProperty('--x',((e.clientX-r.left)/r.width*100)+'%');lit.style.setProperty('--y',((e.clientY-r.top)/r.height*100)+'%')});
 lit.addEventListener('pointerleave',()=>{lit.style.removeProperty('--x');lit.style.removeProperty('--y')});
@@ -470,12 +500,14 @@ const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const cv=document.getElementById('snow'),cx=cv.getContext('2d');
 let W=0,H=0,flakes=[],run=!reduce,raf=0;
 const size=()=>{const d=Math.min(devicePixelRatio||1,2);W=cv.clientWidth;H=cv.clientHeight;cv.width=W*d;cv.height=H*d;cx.setTransform(d,0,0,d,0,0);
- const n=Math.round(Math.min(220,W*H/7000));flakes=Array.from({length:n},()=>({x:Math.random()*W,y:Math.random()*H,r:Math.random()*2.2+.6,s:Math.random()*.6+.3,w:Math.random()*Math.PI*2}))};
-const tick=()=>{cx.clearRect(0,0,W,H);cx.fillStyle='rgba(255,255,255,.85)';
- for(const f of flakes){f.y+=f.s*f.r*.7;f.w+=.01;f.x+=Math.sin(f.w)*.35;if(f.y>H+4){f.y=-4;f.x=Math.random()*W}
+ const n=Math.round(Math.min(220,W*H/7000)*(root.dataset.season==='summer'?.35:1));flakes=Array.from({length:n},()=>({x:Math.random()*W,y:Math.random()*H,r:Math.random()*2.2+.6,s:Math.random()*.6+.3,w:Math.random()*Math.PI*2}))};
+const tick=()=>{cx.clearRect(0,0,W,H);const sum=root.dataset.season==='summer';cx.fillStyle=sum?'rgba(255,214,140,.75)':'rgba(255,255,255,.85)';
+ for(const f of flakes){if(sum){f.y-=f.s*.25;f.w+=.006;f.x+=Math.sin(f.w)*.25;if(f.y<-4){f.y=H+4;f.x=Math.random()*W}}else{f.y+=f.s*f.r*.7;f.w+=.01;f.x+=Math.sin(f.w)*.35;if(f.y>H+4){f.y=-4;f.x=Math.random()*W}}
   cx.globalAlpha=Math.min(1,f.r/2.4);cx.beginPath();cx.arc(f.x,f.y,f.r,0,6.283);cx.fill()}
  cx.globalAlpha=1;if(run)raf=requestAnimationFrame(tick)};
+window.setFlakes=()=>{size();if(!run)tick()};
 const ro=new ResizeObserver(()=>{size();if(!run)tick()});ro.observe(cv);
+applySeason(season,false);
 const io=new IntersectionObserver(es=>{const vis=es[0].isIntersecting&&!reduce;if(vis&&!run){run=true;tick()}else if(!vis){run=false;cancelAnimationFrame(raf)}});io.observe(cv);
 }
 </script>

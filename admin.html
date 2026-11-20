@@ -106,7 +106,7 @@ dialog .acts{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
 <div class="tabs" role="tablist">
 <button class="tab" role="tab" aria-selected="true" data-tab="req" id="t-req">მოთხოვნები <span class="badge" id="cnt">0</span></button>
 <button class="tab" role="tab" aria-selected="false" data-tab="cal" id="t-cal">კალენდარი</button>
-<button class="tab" role="tab" aria-selected="false" data-tab="price" id="t-price">ფასები</button>
+<button class="tab" role="tab" aria-selected="false" data-tab="price" id="t-price">ფასები და სეზონი</button>
 </div>
 <main>
 <section class="panel" id="p-req" role="tabpanel" aria-labelledby="t-req">
@@ -135,6 +135,16 @@ dialog .acts{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
 <section class="panel" id="p-price" role="tabpanel" aria-labelledby="t-price" hidden>
 <h1>ფასები ღამეში, ₾</h1>
 <p class="sub">თითო ნომერს რამდენიმე ფასის ვერსია აქვს სტუმრების რაოდენობის მიხედვით. საიტი და ჩატბოტი ჯგუფისთვის უმცირეს შესაფერის ვერსიას იყენებს: თუ 3 სტუმრის ვერსია არ არის, 4-ის ფასი ჩაითვლება. ახალი წელი: 25 დეკ – 7 იან; ზამთარი: დეკ–მარ; ზაფხული: ივნ–აგვ.</p>
+<div class="pcard" id="seasonCard">
+<h2 style="margin:0 0 6px">საიტის სეზონი</h2>
+<p class="sub" style="margin:0 0 14px">რომელ სეზონში გაიხსნება საიტი სტუმრისთვის: ფოტოები, ფერები და ტექსტები. სტუმარს მაინც შეუძლია გადართვა ღილაკით.</p>
+<div style="display:flex;flex-wrap:wrap;gap:10px 18px;align-items:end">
+<label style="display:grid;gap:6px;font-size:14px;color:var(--mute)">რეჟიმი<select id="sMode" style="min-height:44px;padding:0 10px;border:1px solid var(--line);border-radius:8px;font-size:16px"><option value="auto">ავტომატურად, თარიღებით</option><option value="winter">ყოველთვის ზამთარი</option><option value="summer">ყოველთვის ზაფხული</option></select></label>
+<label style="display:grid;gap:6px;font-size:14px;color:var(--mute)">ზამთარი იწყება<input id="sFrom" type="text" inputmode="numeric" placeholder="12-01" maxlength="5" style="min-height:44px;width:110px;padding:0 10px;border:1px solid var(--line);border-radius:8px;font-size:16px"></label>
+<label style="display:grid;gap:6px;font-size:14px;color:var(--mute)">ზამთარი მთავრდება<input id="sTo" type="text" inputmode="numeric" placeholder="03-31" maxlength="5" style="min-height:44px;width:110px;padding:0 10px;border:1px solid var(--line);border-radius:8px;font-size:16px"></label>
+</div>
+<p class="note" id="sNow" style="margin-top:12px"></p>
+</div>
 <div id="prices"></div>
 <p class="note">ფასები, ნომრების განაწილება და ჯავშნები სანიმუშოა. მონაცემები ამ ბრაუზერში ინახება. <button class="btn" id="resetBtn" style="margin-left:8px">დემოს თავიდან დაწყება</button></p>
 </section>
@@ -269,7 +279,16 @@ $('prices').addEventListener('click',e=>{
 });
 $('resetBtn').onclick=()=>{J.reset();start=J.today();renderAll();flash('დემო თავიდან დაიწყო.',true)};
 
-function renderAll(){renderReqs();renderCal();renderPrices()}
+/* --- site season --- */
+const MON=['იანვარი','თებერვალი','მარტი','აპრილი','მაისი','ივნისი','ივლისი','აგვისტო','სექტემბერი','ოქტომბერი','ნოემბერი','დეკემბერი'];
+const mdText=v=>{const [m,d]=v.split('-').map(Number);return d+' '+MON[m-1]};
+function renderSeason(){const st=J.settings;$('sMode').value=st.seasonMode;$('sFrom').value=st.winterFrom;$('sTo').value=st.winterTo;
+ $('sFrom').disabled=$('sTo').disabled=st.seasonMode!=='auto';
+ const now=J.siteSeason();$('sNow').textContent=(st.seasonMode==='auto'?`ზამთარი: ${mdText(st.winterFrom)} – ${mdText(st.winterTo)}. `:'')+`დღეს საიტი იხსნება: ${now==='winter'?'ზამთარი':'ზაფხული'}.`}
+$('sMode').addEventListener('change',e=>{J.setSetting('seasonMode',e.target.value);renderSeason()});
+['sFrom','sTo'].forEach(id=>$(id).addEventListener('change',e=>{let v=e.target.value.trim().replace(/[./ ]/g,'-');const m=v.match(/^(\d{1,2})-(\d{1,2})$/);
+ if(m&&+m[1]>=1&&+m[1]<=12&&+m[2]>=1&&+m[2]<=31){v=m[1].padStart(2,'0')+'-'+m[2].padStart(2,'0');J.setSetting(id==='sFrom'?'winterFrom':'winterTo',v)}renderSeason()}));
+function renderAll(){renderReqs();renderCal();renderPrices();renderSeason()}
 J.onChange(()=>{if(!$('app').hidden)renderAll()});
 }
 </script>
