@@ -1,5 +1,7 @@
-/* Villa JIJI — shared data layer (demo: stored in this browser's localStorage).
-   Later this file is the only one to swap for a real database (e.g. Supabase). */
+/* Villa JIJI — shared data layer.
+   On Cloudflare (when /api/state answers) data lives in the D1 database via functions/api/*.
+   Anywhere else (GitHub Pages demo) it falls back to this browser's localStorage with sample data.
+   The availability and price rules are duplicated in functions/_lib/core.js; keep them in step. */
 window.JIJI = (() => {
   const KEY = 'jiji-demo-v3';
 
@@ -43,7 +45,7 @@ window.JIJI = (() => {
   };
 
   // ---------- storage ----------
-  let state;
+  let state, mode = 'demo';
   // Which season the site opens in. 'auto' follows the winter date range (MM-DD, may wrap the year).
   const DEFAULT_SETTINGS = { seasonMode: 'auto', winterFrom: '11-15', winterTo: '03-31' };
   // capacity of a type = its largest guest version
@@ -90,7 +92,7 @@ window.JIJI = (() => {
     for (const k in DEFAULT_TYPES) if (!state.types[k]) { state.types[k] = JSON.parse(JSON.stringify(DEFAULT_TYPES[k])); syncCap(k); added = true; }
     if (added) save();
   }
-  function save() { try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* storage unavailable: demo keeps working in memory */ } }
+  function save() { if (mode === 'api') return; try { localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* storage unavailable: demo keeps working in memory */ } }
   function reset() { state = seed(); save(); }
   load();
 
@@ -137,34 +139,37 @@ window.JIJI = (() => {
     const offer = type ? { type } : findOffer(from, to, guests);
     const t = offer ? offer.type : (Object.keys(state.types).find(k => rateFor(k, guests)) || Object.keys(state.types)[0]);
     const req = { id: uid(), room: null, type: t, from, to, guests, name, phone, status: 'pending', source, created: new Date().toISOString() };
-    state.bookings.push(req); save(); return req;
+    state.bookings.push(req); save();
+    req.saved = post('api/request', { from, to, guests, name, phone, source });
+    return req;
   }
   function confirm(id, roomId) {
     const r = state.bookings.find(x => x.id === id); if (!r) return { ok: false, msg: 'ჯავშანი ვერ მოიძებნა' };
     const room = roomId || freeRoomsOfType(r.type, r.from, r.to)[0];
     if (!room || !roomFree(room, r.from, r.to, r.id)) return { ok: false, msg: 'ამ თარიღებზე ' + state.types[r.type].name + ' ნომერი თავისუფალი აღარ არის' };
-    r.room = room; r.status = 'confirmed'; save(); return { ok: true, room };
+    r.room = room; r.status = 'confirmed'; save(); post('api/admin/action', { op: 'confirm', id, room }); return { ok: true, room };
   }
-  function decline(id) { const r = state.bookings.find(x => x.id === id); if (r) { r.status = 'declined'; save(); } }
+  function decline(id) { const r = state.bookings.find(x => x.id === id); if (r) { r.status = 'declined'; save(); post('api/admin/action', { op: 'decline', id }); } }
   function addManual({ room, from, to, name, phone, guests }) {
     if (!roomFree(room, from, to)) return { ok: false, msg: 'ნომერი ' + room + ' ამ თარიღებზე დაკავებულია' };
     const type = ROOMS.find(r => r.id === room).type;
     state.bookings.push({ id: uid(), room, type, from, to, name, phone, guests, status: 'confirmed', source: 'admin', created: new Date().toISOString() });
-    save(); return { ok: true };
+    save(); post('api/admin/action', { op: 'add', room, from, to, name, phone, guests }); return { ok: true };
   }
+  const pushRates = type => post('api/admin/action', { op: 'rates', type, rates: state.types[type].rates });
   function setRate(type, i, field, value) {
     const r = state.types[type].rates[i]; if (!r) return;
     const v = Math.max(0, Math.round(+value || 0));
     if (field === 'guests') r.guests = Math.max(1, v); else r.price[field] = v;
-    syncCap(type); save();
+    syncCap(type); save(); pushRates(type);
   }
   function addRate(type) {
     const rs = state.types[type].rates, last = rs[rs.length - 1];
     rs.push(last ? { guests: last.guests + 1, price: { ...last.price } } : { guests: 2, price: { peak: 0, winter: 0, summer: 0, off: 0 } });
-    syncCap(type); save();
+    syncCap(type); save(); pushRates(type);
   }
-  function removeRate(type, i) { state.types[type].rates.splice(i, 1); syncCap(type); save(); }
-  function setSetting(k, v) { state.settings[k] = v; save(); }
+  function removeRate(type, i) { state.types[type].rates.splice(i, 1); syncCap(type); save(); pushRates(type); }
+  function setSetting(k, v) { state.settings[k] = v; save(); post('api/admin/action', { op: 'setting', k, v }); }
   function siteSeason(day) {
     const st = state.settings || DEFAULT_SETTINGS;
     if (st.seasonMode === 'winter' || st.seasonMode === 'summer') return st.seasonMode;
@@ -172,16 +177,53 @@ window.JIJI = (() => {
     const inWinter = a <= b ? (md >= a && md <= b) : (md >= a || md <= b);
     return inWinter ? 'winter' : 'summer';
   }
-  function remove(id) { state.bookings = state.bookings.filter(x => x.id !== id); save(); }
+  function remove(id) { state.bookings = state.bookings.filter(x => x.id !== id); save(); post('api/admin/action', { op: 'remove', id }); }
+
+  // ---------- server (Cloudflare) ----------
+  const isAdmin = /admin(\.html)?$/.test(location.pathname);
+  const listeners = [], errorListeners = [];
+  const emit = () => listeners.forEach(f => { try { f(); } catch (e) { console.error(e); } });
+  function applyServer(data) {
+    for (const k in data.types) data.types[k].cap = data.types[k].cap ?? (data.types[k].rates.slice(-1)[0]?.guests || 0);
+    state = { types: data.types, settings: data.settings, bookings: data.bookings };
+    ROOMS.length = 0; data.rooms.forEach(r => ROOMS.push(r));
+  }
+  async function refresh() {
+    const r = await fetch(isAdmin ? 'api/admin/state' : 'api/state', { cache: 'no-store' });
+    if (!r.ok) throw new Error('state ' + r.status);
+    applyServer(await r.json()); emit();
+  }
+  async function post(url, body) {
+    if (mode !== 'api') return;
+    try {
+      const r = await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) });
+      const out = await r.json().catch(() => ({}));
+      if (!r.ok || out.ok === false) errorListeners.forEach(f => f(out.msg || out.error || 'შეცდომა სერვერზე'));
+      await refresh();
+      return out;
+    } catch (e) { errorListeners.forEach(f => f('კავშირი სერვერთან ვერ მოხერხდა')); }
+  }
+  const ready = (async () => {
+    if (!/^https?:$/.test(location.protocol) || /github\.io$/.test(location.hostname)) return;
+    try {
+      const ctl = new AbortController(); setTimeout(() => ctl.abort(), 6000);
+      const r = await fetch(isAdmin ? 'api/admin/state' : 'api/state', { cache: 'no-store', signal: ctl.signal });
+      if (!r.ok || !(r.headers.get('content-type') || '').includes('json')) return;
+      const data = await r.json(); if (!data.types) return;
+      mode = 'api'; applyServer(data); emit();
+      if (isAdmin) setInterval(() => refresh().catch(() => {}), 30000);
+    } catch (e) { /* no server: keep the demo */ }
+  })();
 
   // Keep every open tab (site, admin) in sync.
-  const listeners = [];
-  window.addEventListener('storage', e => { if (e.key === KEY) { load(); listeners.forEach(f => f()); } });
+  window.addEventListener('storage', e => { if (mode === 'demo' && e.key === KEY) { load(); listeners.forEach(f => f()); } });
   const onChange = f => listeners.push(f);
+  const onError = f => errorListeners.push(f);
 
   return {
     ROOMS, SEASONS, get settings() { return state.settings; }, setSetting, siteSeason, get types() { return state.types; }, get bookings() { return state.bookings; },
     today, addDays, nights, fmt, fmtRange, weekday, seasonOf, quote, rateFor, fromPrice, findOffer, nextOffer, roomFree,
-    createRequest, confirm, decline, addManual, setRate, addRate, removeRate, remove, reset, onChange, reload: load
+    createRequest, confirm, decline, addManual, setRate, addRate, removeRate, remove, reset, onChange, onError, reload: load,
+    ready, get mode() { return mode; }
   };
 })();

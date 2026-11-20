@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Villa JIJI</title>
-<link rel="stylesheet" href="css/chat.css?v=202611191906">
+<link rel="stylesheet" href="css/chat.css?v=202611191924">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Georgian:wght@300;400;600&family=Noto+Sans+Georgian:wght@400;500;600&family=Cormorant:ital,wght@1,500;1,600&display=swap" rel="stylesheet">
@@ -452,8 +452,8 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 </section>
 </main>
 
-<script src="js/store.js?v=202611191906"></script>
-<script src="js/chat.js?v=202611191906"></script>
+<script src="js/store.js?v=202611191924"></script>
+<script src="js/chat.js?v=202611191924"></script>
 <script>
 {
 /* Room photos: drop files into img/rooms/ and list them here, e.g. lux:['img/rooms/lux-1.jpg'] */
@@ -537,6 +537,7 @@ const tick=()=>{cx.clearRect(0,0,W,H);const sum=root.dataset.season==='summer';c
 window.setFlakes=()=>{size();if(!run)tick()};
 const ro=new ResizeObserver(()=>{size();if(!run)tick()});ro.observe(cv);
 applySeason(season,false);
+JIJI.onChange(()=>{let chosen=null;try{chosen=localStorage.getItem('jiji-season')}catch(e){}if(!chosen&&JIJI.siteSeason()!==season)applySeason(JIJI.siteSeason(),true)});
 const io=new IntersectionObserver(es=>{const vis=es[0].isIntersecting&&!reduce;if(vis&&!run){run=true;tick()}else if(!vis){run=false;cancelAnimationFrame(raf)}});io.observe(cv);
 }
 </script>

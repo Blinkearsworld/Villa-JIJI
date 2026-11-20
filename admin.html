@@ -175,7 +175,7 @@ dialog .acts{display:flex;justify-content:flex-end;gap:8px;flex-wrap:wrap}
 </form>
 </dialog>
 
-<script src="js/store.js?v=202611191906"></script>
+<script src="js/store.js?v=202611191924"></script>
 <script>
 {
 const J=JIJI,$=id=>document.getElementById(id);
@@ -187,6 +187,9 @@ const typeName=t=>J.types[t]?.name||t;
 const unlock=()=>{$('gate').hidden=true;$('app').hidden=false;renderAll()};
 let ok=false;try{ok=sessionStorage.getItem('jiji-admin')==='1'}catch(e){}
 if(ok)unlock();
+/* on Cloudflare, Access already checked the login: skip the demo PIN */
+J.ready.then(()=>{if(J.mode==='api'){if($('app').hidden)unlock();$('resetBtn').hidden=true;document.querySelector('#gate').hidden=true}});
+J.onError(m=>{flash(m,false);renderAll()});
 $('gateForm').addEventListener('submit',e=>{e.preventDefault();if($('pin').value==='1234'){try{sessionStorage.setItem('jiji-admin','1')}catch(e){}unlock()}else{$('pinMsg').hidden=false}});
 
 /* --- tabs --- */
