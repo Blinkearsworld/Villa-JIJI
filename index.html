@@ -135,7 +135,7 @@ body.at-hero .jc-fab{opacity:0;pointer-events:none;transform:translateY(12px)}
 .ny .small{margin-top:14px}
 .sgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
 .sgrid img{width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:10px}
-@media(max-width:860px){.ny .sgrid{order:-1}}
+@media(max-width:860px){.ny .vbox{order:-1}}
 @media(max-width:860px){.ny .wrap{grid-template-columns:minmax(0,1fr)}.ny .vbox{order:-1}}
 /* spaces, territory, nearby */
 .sec{padding:clamp(80px,10vw,140px) 0}
@@ -313,9 +313,10 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 <div class="chips"><span>აუზი</span><span>ბატუტი</span><span>ბავშვთა წვეულებები</span><span>მაყალი</span></div>
 <div class="act"><button class="btn lamp" type="button" data-chat>ზაფხულის თარიღები</button></div>
 </div>
-<div class="sgrid">
-<img src="img/summer/pool-kids.jpg" alt="ბავშვები აუზში იცინიან და წყალს აშხეფებენ" loading="lazy">
-<img src="img/summer/bubbles.jpg" alt="ბავშვები საპნის ბუშტებში, ეზოს წვეულება" loading="lazy">
+<div class="vbox" id="sumBox">
+<img src="video/summer-poster.jpg" alt="ვილა ჯიჯი ზაფხულის მზეზე, აბრა და აივნები" loading="lazy">
+<button class="vplay" type="button" id="sumPlay" aria-label="ზაფხულის ვიდეოს ჩართვა"><span><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>ვიდეოს ნახვა</span></button>
+<span class="len">0:20</span>
 </div>
 </div>
 </section>
@@ -341,9 +342,10 @@ footer span:first-child{font:italic 600 24px/1 Cormorant,serif;color:var(--snow)
 <figure class="only-w"><img src="img/winter/wine-terrace.jpg" alt="ღვინო ტერასაზე, განათებული ფასადი" loading="lazy"><figcaption>ღვინო ტერასაზე</figcaption></figure>
 <figure class="only-w"><img src="img/winter/fireworks.jpg" alt="ფეიერვერკი ვილა ჯიჯის თავზე" loading="lazy"><figcaption>ფეიერვერკი</figcaption></figure>
 <figure class="only-w"><img src="img/winter/table.jpg" alt="ახალი წლის სუფრა ბუხართან" loading="lazy"><figcaption>ახალი წლის სუფრა</figcaption></figure>
+<figure class="only-s"><img src="img/summer/pool-kids.jpg" alt="ბავშვები აუზში" loading="lazy"><figcaption>აუზი</figcaption></figure>
+<figure class="only-s"><img src="img/summer/bubbles.jpg" alt="საპნის ბუშტების წვეულება ეზოში" loading="lazy"><figcaption>ბავშვთა წვეულება</figcaption></figure>
 <figure class="only-s"><img src="img/summer/mug-facade.jpg" alt="ყავა ტერასაზე, ფასადი და ყვავილები" loading="lazy"><figcaption>დილის ყავა</figcaption></figure>
 <figure class="only-s"><img src="img/summer/family-lawn.jpg" alt="ოჯახი გაზონზე ვილა ჯიჯის წინ" loading="lazy"><figcaption>გაზონი</figcaption></figure>
-<figure class="only-s"><img src="img/pool-key.jpg" alt="აუზი ვილა ჯიჯის წინ" loading="lazy"><figcaption>აუზი</figcaption></figure>
 <figure class="only-s"><img src="img/summer/pergola.jpg" alt="ფანჩატური საქანელით" loading="lazy"><figcaption>ფანჩატური</figcaption></figure>
 </div>
 </section>
@@ -519,6 +521,8 @@ const heroEl=document.getElementById('hero');
 const heroIO=new IntersectionObserver(es=>document.body.classList.toggle('at-hero',es[0].isIntersecting&&es[0].intersectionRatio>.35),{threshold:[0,.35,.6]});heroIO.observe(heroEl);
 const nyBox=document.getElementById('nyBox');
 document.getElementById('nyPlay').addEventListener('click',()=>{nyBox.innerHTML='<video src="video/new-year.mp4" poster="video/new-year-poster.jpg" controls playsinline preload="auto"></video>';const v=nyBox.querySelector('video');v.play().catch(()=>{})});
+const sumBox=document.getElementById('sumBox');
+document.getElementById('sumPlay').addEventListener('click',()=>{sumBox.innerHTML='<video src="video/summer.mp4" poster="video/summer-poster.jpg" controls playsinline preload="auto"></video>';sumBox.querySelector('video').play().catch(()=>{})});
 document.getElementById('summer').addEventListener('click',e=>{if(e.target.closest('[data-chat]'))window.JIJIChat?.open()});
 document.getElementById('newyear').addEventListener('click',e=>{if(e.target.closest('[data-chat]'))window.JIJIChat?.open()});
 const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
